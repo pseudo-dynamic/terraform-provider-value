@@ -49,9 +49,9 @@ signs:
       - "${artifact}"
 release:
   github:
-    owner: "teneko"
+    owner: "pseudo-dynamic"
     name: "terraform-provider-value"
   # If you want to manually examine the release before its live, uncomment this line:
-  draft: true
+  # draft: true
 changelog:
   skip: true
