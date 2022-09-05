@@ -5,28 +5,27 @@ import (
 	"log"
 	"os"
 
-	stash "github.com/teneko/terraform-provider-value/stash/provider"
+	promise "github.com/pseudo-dynamic/terraform-provider-value/promise/provider"
+	stash "github.com/pseudo-dynamic/terraform-provider-value/stash/provider"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server"
-	tfmux "github.com/hashicorp/terraform-plugin-mux"
+	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 )
 
 // Generate the Terraform provider documentation using `tfplugindocs`:
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
 func main() {
-	valueProvider := stash.Provider()
+	stashProvider := stash.Provider()
+	lazyProvider := promise.Provider()
 
 	ctx := context.Background()
-	factory, err := tfmux.NewSchemaServerFactory(ctx, valueProvider)
+	muxer, err := tf5muxserver.NewMuxServer(ctx, stashProvider, lazyProvider)
 
 	if err != nil {
 		log.Println(err.Error())
 		os.Exit(1)
 	}
 
-	tf5server.Serve("registry.terraform.io/teneko/value", func() tfprotov5.ProviderServer {
-		return factory.Server()
-	})
+	tf5server.Serve("registry.terraform.io/pseudo-dynamic/value", muxer.ProviderServer)
 }

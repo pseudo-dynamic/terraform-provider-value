@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     value = {
-      source  = "github.com/teneko/value"
+      source  = "github.com/pseudo-dynamic/value"
       version = "0.1.0"
     }
   }
@@ -24,12 +24,8 @@ resource "value_stash" "default" {
       quantity = 2
     }
   ]
-
-  lifecycle {
-    ignore_changes = all
-  }
 }
 
-output "edu_order" {
+output "value" {
   value = value_stash.default.value
 }

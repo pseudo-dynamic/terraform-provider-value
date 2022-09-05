@@ -46,8 +46,8 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	// 	return response, nil
 	// }
 
-	// proposedValue := make(map[string]tftypes.Value)
-	// err = proposedState.As(&proposedValue)
+	// proposedValueMap := make(map[string]tftypes.Value)
+	// err = proposedState.As(&proposedValueMap)
 
 	// if err != nil {
 	// 	response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
@@ -87,27 +87,20 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	// }
 
 	// if proposedState.IsNull() {
-	// 	// we plan to delete the resource
-	// 	if _, ok := priorValue["timestamp"]; ok {
-	// 		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-	// 			Severity: tfprotov5.DiagnosticSeverityError,
-	// 			Summary:  "Invalid prior state while planning for destroy",
-	// 			Detail:   fmt.Sprintf("'timestamp' attribute missing from state: %s", err),
-	// 		})
-
-	// 		return response, nil
-	// 	}
-
+	// 	// Plan to delete
 	// 	response.PlannedState = request.ProposedNewState
 	// 	return response, nil
 	// }
 
-	// if proposedValue["timestamp"].IsNull() {
-	// 	// plan for Create
-	// 	proposedValue["timestamp"] = tftypes.NewValue(tftypes.String, tftypes.UnknownValue)
-	// 	propStateVal := tftypes.NewValue(proposedState.Type(), proposedValue)
-	// 	s.logger.Trace("[PlanResourceChange]", "new planned state", dump(propStateVal))
-	// 	plannedState, err := tfprotov5.NewDynamicValue(resourceType, propStateVal)
+	// if proposedValueMap["value"].IsNull() {
+	// 	proposedValueMap["result"] = tftypes.NewValue(tftypes.DynamicPseudoType, nil)
+	// }
+
+	// if proposedValueMap["value"].IsNull() {
+	// 	proposedValueMap["value"] = tftypes.NewValue(tftypes.DynamicPseudoType)
+	// 	customProposedValue := tftypes.NewValue(proposedState.Type(), proposedValueMap)
+	// 	s.logger.Trace("[PlanResourceChange]", "new planned state", dump(customProposedValue))
+	// 	customPlannedState, err := tfprotov5.NewDynamicValue(resourceType, customProposedValue)
 
 	// 	if err != nil {
 	// 		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
@@ -119,12 +112,14 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	// 		return response, nil
 	// 	}
 
-	// 	response.PlannedState = &plannedState
+	// 	response.PlannedState = &customPlannedState
 	// } else {
-	// 	// plan for Update
-	// 	// NO-OP
-	// 	response.PlannedState = request.PriorState
+	// 	response.PlannedState = request.ProposedNewState
 	// }
 
+	// customProposedValue := tftypes.NewValue(proposedState.Type(), proposedValueMap)
+	// s.logger.Trace("[PlanResourceChange]", "new planned state", dump(customProposedValue))
+	// customPlannedState, err := tfprotov5.NewDynamicValue(resourceType, customProposedValue)
+	// response.PlannedState = &customPlannedState
 	// return response, nil
 }

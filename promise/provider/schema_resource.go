@@ -46,19 +46,27 @@ func GetResourceType(name string) (tftypes.Type, error) {
 // GetProviderResourceSchema contains the definitions of all supported resources
 func GetProviderResourceSchema() map[string]*tfprotov5.Schema {
 	return map[string]*tfprotov5.Schema{
-		"value_stash": {
+		"value_promise": {
 			Version: 1,
 			Block: &tfprotov5.SchemaBlock{
-				Description: "Allows you to manage a value as resource.",
-				BlockTypes:  []*tfprotov5.SchemaNestedBlock{},
+				Description: "Allows you to treat a value as unknown. This is desirable when delaying postconditions.",
+				BlockTypes: []*tfprotov5.SchemaNestedBlock{},
 				Attributes: []*tfprotov5.SchemaAttribute{
 					{
 						Name:        "value",
 						Type:        tftypes.DynamicPseudoType,
-						Required:    false,
-						Optional:    true,
+						Required:    true,
+						Optional:    false,
 						Computed:    false,
-						Description: "The value to store/stash.",
+						Description: "The value to promise. Any (nested) change to `value` results into `result` to be marked as `(known after apply)`",
+					},
+					{
+						Name:        "result",
+						Type:        tftypes.DynamicPseudoType,
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Description: "Is set to `value`.",
 					},
 				},
 			},

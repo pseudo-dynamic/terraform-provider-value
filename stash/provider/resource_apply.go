@@ -34,42 +34,47 @@ func (s *RawProviderServer) ApplyResourceChange(ctx context.Context, request *tf
 	response.NewState = request.PlannedState
 	return response, nil
 
-	// applyPlannedState, err := req.PlannedState.Unmarshal(rt)
+	// plannedState, err := request.PlannedState.Unmarshal(resourceType)
 
 	// if err != nil {
-	// 	resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+	// 	response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
 	// 		Severity: tfprotov5.DiagnosticSeverityError,
 	// 		Summary:  "Failed to unmarshal planned resource state",
 	// 		Detail:   err.Error(),
 	// 	})
-	// 	return resp, nil
+	// 	return response, nil
 	// }
 
-	// s.logger.Trace("[ApplyResourceChange][PlannedState] %#v", applyPlannedState)
-
-	// applyPriorState, err := req.PriorState.Unmarshal(rt)
+	// s.logger.Trace("[ApplyResourceChange][PlannedState] %#v", plannedState)
+	// priorState, err := request.PriorState.Unmarshal(resourceType)
 
 	// if err != nil {
-	// 	resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+	// 	response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
 	// 		Severity: tfprotov5.DiagnosticSeverityError,
 	// 		Summary:  "Failed to unmarshal prior resource state",
 	// 		Detail:   err.Error(),
 	// 	})
-	// 	return resp, nil
+	// 	return response, nil
 	// }
 
-	// s.logger.Trace("[ApplyResourceChange]", "[PriorState]", dump(applyPriorState))
-
-	// applyPlannedValue := make(map[string]tftypes.Value)
-	// err = applyPlannedState.As(&applyPlannedValue)
+	// s.logger.Trace("[ApplyResourceChange]", "[PriorState]", dump(priorState))
+	// plannedValueMap := make(map[string]tftypes.Value)
+	// err = plannedState.As(&plannedValueMap)
 
 	// if err != nil {
-	// 	resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+	// 	response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
 	// 		Severity: tfprotov5.DiagnosticSeverityError,
 	// 		Summary:  "Failed to extract planned resource state from tftypes.Value",
 	// 		Detail:   err.Error(),
 	// 	})
-	// 	return resp, nil
+	// 	return response, nil
+	// }
+
+	// if !plannedState.IsNull() {
+	// 	// Create or update
+	// 	if plannedValueMap["value"].IsNull() {
+	// 		plannedValueMap["value"] = tftypes.NewValue(tftypes.DynamicPseudoType, nil)
+	// 	}
 	// }
 
 	// switch {
@@ -81,31 +86,31 @@ func (s *RawProviderServer) ApplyResourceChange(ctx context.Context, request *tf
 
 	// 	applyStateVal := tftypes.NewValue(applyPlannedState.Type(), applyPlannedValue)
 	// 	s.logger.Trace("[ApplyResourceChange]", "[PropStateVal]", dump(applyStateVal))
-	// 	plannedState, err := tfprotov5.NewDynamicValue(rt, applyStateVal)
+	// 	customPlannedState, err := tfprotov5.NewDynamicValue(resourceType, applyStateVal)
 
 	// 	if err != nil {
-	// 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+	// 		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
 	// 			Severity: tfprotov5.DiagnosticSeverityError,
 	// 			Summary:  "Failed to assemble proposed state during apply",
 	// 			Detail:   err.Error(),
 	// 		})
-	// 		return resp, nil
+	// 		return response, nil
 	// 	}
 
-	// 	s.logger.Trace("[ApplyResourceChange]", "[PlannedState]", dump(plannedState))
-	// 	resp.NewState = &plannedState
+	// 	s.logger.Trace("[ApplyResourceChange]", "[PlannedState]", dump(customPlannedState))
+	// 	response.NewState = &customPlannedState
 	// case !applyPlannedState.IsNull() && !applyPriorState.IsNull():
-	// 	resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
+	// 	response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
 	// 		Severity: tfprotov5.DiagnosticSeverityError,
 	// 		Summary:  "Attempting to perform update on cache resource",
 	// 		Detail:   "An update operation was attempted on a cache resource. This should not occur. Please report this to the provider maintainers.",
 	// 	})
 
-	// 	return resp, nil
+	// 	return response, nil
 	// case applyPlannedState.IsNull():
 	// 	// Delete the resource
-	// 	return resp, nil
+	// 	return response, nil
 	// }
 
-	// return resp, nil
+	// return response, nil
 }
