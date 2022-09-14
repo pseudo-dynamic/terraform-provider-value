@@ -45,7 +45,9 @@ resource creation and resource deletion as change you can try the following appr
 			"value": {
 				Type:     types.StringType,
 				Computed: true,
-				Description: `If the very first condition is false or remains false, then the value remains unchanged. 
+				Description: `If the very first condition is false, then the value will be once initialized by a random value.
+
+If the condition is false or remains false, then the value remains unchanged. 
 The condition change from true to false does not trigger a replacement of those who use the value as
 target for replace_triggered_by.
 

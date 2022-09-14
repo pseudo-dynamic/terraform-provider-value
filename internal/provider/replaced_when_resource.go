@@ -84,14 +84,14 @@ func (r *ReplacedWhenResource) ModifyPlan(ctx context.Context, req resource.Modi
 	}
 
 	var newValue types.String
+	var currentValueNotOnceSet = currentValue.IsUnknown() || currentValue.IsNull()
 
-	if !suppliedCondition.Unknown {
-		if currentValue.IsUnknown() || suppliedCondition.Value {
-			// First creation of attribute / state value won't never be null again
-			// OR supplied condition (config) is known (the latter condition is also
-			// true if the unknown condition has been computed once and didn't change
-			// and is therefore not unknown anymore)
-
+	if currentValueNotOnceSet || !suppliedCondition.Unknown {
+		// Empty value (state) / state value won't never be unknown or null again
+		// OR supplied condition (config) is known (the latter condition is also
+		// true if the unknown condition has been computed once and didn't change
+		// and is therefore not unknown anymore)
+		if currentValueNotOnceSet || suppliedCondition.Value {
 			// if currentValue.IsUnknown() {
 			// 	newValue = types.String{Null: true}
 			// } else {
