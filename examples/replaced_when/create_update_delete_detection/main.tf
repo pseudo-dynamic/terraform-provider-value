@@ -12,7 +12,7 @@ terraform {
 # }
 
 resource "value_replaced_when" "true" {
-  count     = 0
+  count     = 1
   condition = true
 }
 
