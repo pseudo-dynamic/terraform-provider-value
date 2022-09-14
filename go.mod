@@ -1,11 +1,13 @@
 module github.com/pseudo-dynamic/terraform-provider-value
 
-go 1.17
+go 1.19
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-hclog v1.2.1
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
-	github.com/hashicorp/terraform-plugin-go v0.12.0
+	github.com/hashicorp/terraform-plugin-framework v0.12.0
+	github.com/hashicorp/terraform-plugin-go v0.14.0
 	github.com/hashicorp/terraform-plugin-mux v0.7.0
 	golang.org/x/mod v0.5.1
 	google.golang.org/grpc v1.48.0
@@ -19,8 +21,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -31,7 +32,7 @@ require (
 	github.com/hashicorp/hc-install v0.4.0 // indirect
 	github.com/hashicorp/terraform-exec v0.17.2 // indirect
 	github.com/hashicorp/terraform-json v0.14.0 // indirect
-	github.com/hashicorp/terraform-plugin-log v0.6.0 // indirect
+	github.com/hashicorp/terraform-plugin-log v0.7.0 // indirect
 	github.com/hashicorp/terraform-registry-address v0.0.0-20220623143253-7d51757b572c // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
@@ -57,5 +58,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 )

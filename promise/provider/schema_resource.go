@@ -49,8 +49,8 @@ func GetProviderResourceSchema() map[string]*tfprotov5.Schema {
 		"value_promise": {
 			Version: 1,
 			Block: &tfprotov5.SchemaBlock{
-				Description: "Allows you to treat a value as unknown. This is desirable when delaying postconditions.",
-				BlockTypes: []*tfprotov5.SchemaNestedBlock{},
+				Description: "Allows you to treat a value as unknown. This is desirable when you want postconditions first being evaluated during apply phase.",
+				BlockTypes:  []*tfprotov5.SchemaNestedBlock{},
 				Attributes: []*tfprotov5.SchemaAttribute{
 					{
 						Name:        "value",
@@ -66,7 +66,7 @@ func GetProviderResourceSchema() map[string]*tfprotov5.Schema {
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
-						Description: "Is set to `value`.",
+						Description: "`result` is as soon as you apply set to `value`. Every change of `value` results into `result` to be marked as `(known after apply)`",
 					},
 				},
 			},

@@ -20,7 +20,7 @@ func (s *RawProviderServer) canExecute() (resp []*tfprotov5.Diagnostic) {
 		resp = append(resp, &tfprotov5.Diagnostic{
 			Severity: tfprotov5.DiagnosticSeverityError,
 			Summary:  "Incompatible terraform version",
-			Detail:   fmt.Sprintf("The `promise` resource requires Terraform %s or above", minTFVersion),
+			Detail:   fmt.Sprintf("The `is_known` resource requires Terraform %s or above", minTFVersion),
 		})
 	}
 

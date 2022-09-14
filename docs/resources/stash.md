@@ -3,12 +3,12 @@
 page_title: "value_stash Resource - terraform-provider-value"
 subcategory: ""
 description: |-
-  Allows you to manage a value as resource.
+  Allows you to manage any kind of value as resource.
 ---
 
 # value_stash (Resource)
 
-Allows you to manage a value as resource.
+Allows you to manage any kind of value as resource.
 
 
 
@@ -17,6 +17,6 @@ Allows you to manage a value as resource.
 
 ### Optional
 
-- `value` (Dynamic) The value to store/stash.
+- `value` (Dynamic) The value to store.
 
 

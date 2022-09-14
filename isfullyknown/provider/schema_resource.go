@@ -46,19 +46,29 @@ func GetResourceType(name string) (tftypes.Type, error) {
 // GetProviderResourceSchema contains the definitions of all supported resources
 func GetProviderResourceSchema() map[string]*tfprotov5.Schema {
 	return map[string]*tfprotov5.Schema{
-		"value_stash": {
+		"value_is_fully_known": {
 			Version: 1,
 			Block: &tfprotov5.SchemaBlock{
-				Description: "Allows you to manage any kind of value as resource.",
+				Description: "Allows you to have a access to `result` during plan phase that states whether `value`or any nested attribute is marked as `(known after apply)` or not. ",
 				BlockTypes:  []*tfprotov5.SchemaNestedBlock{},
 				Attributes: []*tfprotov5.SchemaAttribute{
 					{
 						Name:        "value",
 						Type:        tftypes.DynamicPseudoType,
-						Required:    false,
-						Optional:    true,
+						Required:    true,
+						Optional:    false,
 						Computed:    false,
-						Description: "The value to store.",
+						Description: "The `value` and nested attributes to test against `(known after apply)`",
+					},
+					{
+						Name:     "result",
+						Type:     tftypes.Bool,
+						Required: false,
+						Optional: false,
+						Computed: true,
+						Description: "States whether `value` or any nested attribute is marked as `(known after apply)` or not. If `value` is an aggregate " +
+							"type, not only the top level of the aggregate type is checked; elements and attributes " +
+							"are checked too.",
 					},
 				},
 			},

@@ -3,12 +3,12 @@
 page_title: "value_promise Resource - terraform-provider-value"
 subcategory: ""
 description: |-
-  Allows you to treat a value as unknown. This is desirable when delaying postconditions.
+  Allows you to treat a value as unknown. This is desirable when you want postconditions first being evaluated during apply phase.
 ---
 
 # value_promise (Resource)
 
-Allows you to treat a value as unknown. This is desirable when delaying postconditions.
+Allows you to treat a value as unknown. This is desirable when you want postconditions first being evaluated during apply phase.
 
 
 
@@ -21,6 +21,6 @@ Allows you to treat a value as unknown. This is desirable when delaying postcond
 
 ### Read-Only
 
-- `result` (Dynamic) Is set to `value`.
+- `result` (Dynamic) `result` is as soon as you apply set to `value`. Every change of `value` results into `result` to be marked as `(known after apply)`
 
 

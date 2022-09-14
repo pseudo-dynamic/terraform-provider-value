@@ -1,3 +1,3 @@
 # terraform-provider-value
 
-A terraform provider providing a resource that let's you store any kind of value.
+A terraform provider providing resources to work with values. :smile:
