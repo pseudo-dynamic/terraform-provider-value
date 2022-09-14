@@ -3,12 +3,12 @@ package provider
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 // GetObjectTypeFromSchema returns a tftypes.Type that can wholy represent the schema input
-func GetObjectTypeFromSchema(schema *tfprotov5.Schema) tftypes.Type {
+func GetObjectTypeFromSchema(schema *tfprotov6.Schema) tftypes.Type {
 	bm := map[string]tftypes.Type{}
 
 	for _, att := range schema.Block.Attributes {
@@ -16,16 +16,25 @@ func GetObjectTypeFromSchema(schema *tfprotov5.Schema) tftypes.Type {
 	}
 
 	for _, b := range schema.Block.BlockTypes {
-		attrs := map[string]tftypes.Type{}
-
+		a := map[string]tftypes.Type{}
 		for _, att := range b.Block.Attributes {
-			attrs[att.Name] = att.Type
+			a[att.Name] = att.Type
+		}
+		bm[b.TypeName] = tftypes.List{
+			ElementType: tftypes.Object{AttributeTypes: a},
 		}
 
-		bm[b.TypeName] = tftypes.List{
-			ElementType: tftypes.Object{AttributeTypes: attrs},
+		// FIXME we can make this function recursive to handle
+		// n levels of nested blocks
+		for _, bb := range b.Block.BlockTypes {
+			aa := map[string]tftypes.Type{}
+			for _, att := range bb.Block.Attributes {
+				aa[att.Name] = att.Type
+			}
+			a[bb.TypeName] = tftypes.List{
+				ElementType: tftypes.Object{AttributeTypes: aa},
+			}
 		}
-		// TODO handle repeated blocks
 	}
 
 	return tftypes.Object{AttributeTypes: bm}
@@ -44,21 +53,21 @@ func GetResourceType(name string) (tftypes.Type, error) {
 }
 
 // GetProviderResourceSchema contains the definitions of all supported resources
-func GetProviderResourceSchema() map[string]*tfprotov5.Schema {
-	return map[string]*tfprotov5.Schema{
+func GetProviderResourceSchema() map[string]*tfprotov6.Schema {
+	return map[string]*tfprotov6.Schema{
 		"value_promise": {
 			Version: 1,
-			Block: &tfprotov5.SchemaBlock{
+			Block: &tfprotov6.SchemaBlock{
 				Description: "Allows you to treat a value as unknown. This is desirable when you want postconditions first being evaluated during apply phase.",
-				BlockTypes:  []*tfprotov5.SchemaNestedBlock{},
-				Attributes: []*tfprotov5.SchemaAttribute{
+				BlockTypes:  []*tfprotov6.SchemaNestedBlock{},
+				Attributes: []*tfprotov6.SchemaAttribute{
 					{
 						Name:        "value",
 						Type:        tftypes.DynamicPseudoType,
 						Required:    true,
 						Optional:    false,
 						Computed:    false,
-						Description: "The value to promise. Any (nested) change to `value` results into `result` to be marked as `(known after apply)`",
+						Description: "The value to promise. Any (nested) change to `value` results into `result` to be marked as \"(known after apply)\"",
 					},
 					{
 						Name:        "result",
@@ -66,7 +75,7 @@ func GetProviderResourceSchema() map[string]*tfprotov5.Schema {
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
-						Description: "`result` is as soon as you apply set to `value`. Every change of `value` results into `result` to be marked as `(known after apply)`",
+						Description: "`result` is as soon as you apply set to `value`. Every change of `value` results into `result` to be marked as \"(known after apply)\"",
 					},
 				},
 			},

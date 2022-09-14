@@ -2,35 +2,27 @@ package provider
 
 import (
 	"context"
-	"log"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
-// ValidateResourceTypeConfig function
-func (s *RawProviderServer) ValidateResourceTypeConfig(ctx context.Context, req *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
-	resp := &tfprotov5.ValidateResourceTypeConfigResponse{}
-	rt, err := GetResourceType(req.TypeName)
+// ValidateDataResourceConfig function
+func (s *UserProviderServer) ValidateDataResourceConfig(ctx context.Context, req *tfprotov6.ValidateDataResourceConfigRequest) (*tfprotov6.ValidateDataResourceConfigResponse, error) {
+	resp := &tfprotov6.ValidateDataResourceConfigResponse{}
+	return resp, nil
+}
 
-	if err != nil {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Failed to determine resource type",
-			Detail:   err.Error(),
-		})
-
-		return resp, nil
-	}
-
-	log.Println("--------------------TEST----------------------")
-	log.Printf("ResourceType: %v\n", rt)
+// ValidateResourceConfig function
+func (s *UserProviderServer) ValidateResourceConfig(ctx context.Context, req *tfprotov6.ValidateResourceConfigRequest) (*tfprotov6.ValidateResourceConfigResponse, error) {
+	resp := &tfprotov6.ValidateResourceConfigResponse{}
+	resourceType := getResourceType(req.TypeName)
 
 	// Decode proposed resource state
-	config, err := req.Config.Unmarshal(rt)
+	config, err := req.Config.Unmarshal(resourceType)
 	if err != nil {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to unmarshal resource state",
 			Detail:   err.Error(),
 		})
@@ -45,8 +37,8 @@ func (s *RawProviderServer) ValidateResourceTypeConfig(ctx context.Context, req 
 	err = config.As(&configVal)
 
 	if err != nil {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to extract resource state from SDK value",
 			Detail:   err.Error(),
 		})
@@ -57,10 +49,23 @@ func (s *RawProviderServer) ValidateResourceTypeConfig(ctx context.Context, req 
 	_, ok := configVal["value"]
 
 	if !ok {
-		resp.Diagnostics = append(resp.Diagnostics, &tfprotov5.Diagnostic{
-			Severity:  tfprotov5.DiagnosticSeverityError,
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+			Severity:  tfprotov6.DiagnosticSeverityError,
 			Summary:   "Value missing from resource configuration",
 			Detail:    "A value attribute containing a valid terraform value is required.",
+			Attribute: att,
+		})
+
+		return resp, nil
+	}
+
+	_, ok = configVal["unique_seed"]
+
+	if !ok {
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+			Severity:  tfprotov6.DiagnosticSeverityError,
+			Summary:   "Unique seed missing from resource configuration",
+			Detail:    "A unique_seed attribute containing a valid terraform value is required.",
 			Attribute: att,
 		})
 

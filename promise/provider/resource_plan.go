@@ -4,13 +4,13 @@ import (
 	"context"
 	// "fmt"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 // PlanResourceChange function
-func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfprotov5.PlanResourceChangeRequest) (*tfprotov5.PlanResourceChangeResponse, error) {
-	response := &tfprotov5.PlanResourceChangeResponse{}
+func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfprotov6.PlanResourceChangeRequest) (*tfprotov6.PlanResourceChangeResponse, error) {
+	response := &tfprotov6.PlanResourceChangeResponse{}
 	execDiag := s.canExecute()
 
 	if len(execDiag) > 0 {
@@ -21,8 +21,8 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	resourceType, err := GetResourceType(request.TypeName)
 
 	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		response.Diagnostics = append(response.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to determine planned resource type",
 			Detail:   err.Error(),
 		})
@@ -34,8 +34,8 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	proposedState, err := request.ProposedNewState.Unmarshal(resourceType)
 
 	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		response.Diagnostics = append(response.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to unmarshal planned resource state",
 			Detail:   err.Error(),
 		})
@@ -47,8 +47,8 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	err = proposedState.As(&proposedValueMap)
 
 	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		response.Diagnostics = append(response.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to extract planned resource state from tftypes.Value",
 			Detail:   err.Error(),
 		})
@@ -60,8 +60,8 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	priorState, err := request.PriorState.Unmarshal(resourceType)
 
 	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		response.Diagnostics = append(response.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to unmarshal prior resource state",
 			Detail:   err.Error(),
 		})
@@ -69,13 +69,12 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 		return response, nil
 	}
 
-	s.logger.Trace("[PlanResourceChange]", "[PriorState]", dump(priorState))
 	priorValueMap := make(map[string]tftypes.Value)
 	err = priorState.As(&priorValueMap)
 
 	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		response.Diagnostics = append(response.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to extract prior resource state from tftypes.Value",
 			Detail:   err.Error(),
 		})
@@ -100,8 +99,8 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 		valueDiffs, err := proposedValueMap["value"].Diff(priorValueMap["value"])
 
 		if err != nil {
-			response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-				Severity: tfprotov5.DiagnosticSeverityError,
+			response.Diagnostics = append(response.Diagnostics, &tfprotov6.Diagnostic{
+				Severity: tfprotov6.DiagnosticSeverityError,
 				Summary:  "Failed to calculate value diff during plan",
 				Detail:   err.Error(),
 			})
@@ -115,12 +114,11 @@ func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfp
 	if isResultUnknown {
 		proposedValueMap["result"] = tftypes.NewValue(tftypes.DynamicPseudoType, tftypes.UnknownValue)
 		customPlannedValue := tftypes.NewValue(proposedState.Type(), proposedValueMap)
-		s.logger.Trace("[PlanResourceChange]", "new planned state", dump(customPlannedValue))
-		customPlannedState, err := tfprotov5.NewDynamicValue(resourceType, customPlannedValue)
+		customPlannedState, err := tfprotov6.NewDynamicValue(resourceType, customPlannedValue)
 
 		if err != nil {
-			response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-				Severity: tfprotov5.DiagnosticSeverityError,
+			response.Diagnostics = append(response.Diagnostics, &tfprotov6.Diagnostic{
+				Severity: tfprotov6.DiagnosticSeverityError,
 				Summary:  "Failed to assemble proposed state during plan",
 				Detail:   err.Error(),
 			})

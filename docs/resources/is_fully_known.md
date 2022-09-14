@@ -3,12 +3,51 @@
 page_title: "value_is_fully_known Resource - terraform-provider-value"
 subcategory: ""
 description: |-
-  Allows you to have a access to result during plan phase that states whether valueor any nested attribute is marked as (known after apply) or not.
+  Allows you to have a access to result during plan phase that states whether value or any nested attribute is marked as "(known after apply)" or not.
+  Provider Metadata
+  Each module can use provider_meta. Beware that these settings only count for resources of this module. (see https://www.terraform.io/internals/provider-meta):
+  terraform
+  // Terraform provider_meta example
+  terraform {
+      // "value" is the provider name
+      provider_meta "value" {
+          // {workdir} -> The only available placeholder currently (see below for more information)
+          seed_prefix = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
+      }
+  }
+  
+  Optional
+  seed_prefix (String) It gets appended to each seed of any value_is_fully_known (resource) or value_is_known (resource) within the same module.
+  Placeholders:
+  "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
+  recommended because this value won't be drag along the plan and apply phase in comparison to
+  abspath(path.root) that you would add to resource seed where a change to path.root would be
+  recognized just as usual from terraform.
 ---
 
 # value_is_fully_known (Resource)
 
-Allows you to have a access to `result` during plan phase that states whether `value`or any nested attribute is marked as `(known after apply)` or not.
+Allows you to have a access to `result` during plan phase that states whether `value` or any nested attribute is marked as "(known after apply)" or not.
+## Provider Metadata
+Each module can use provider_meta. Beware that these settings only count for resources of this module. (see https://www.terraform.io/internals/provider-meta):
+```terraform
+// Terraform provider_meta example
+terraform {
+	// "value" is the provider name
+	provider_meta "value" {
+		// {workdir} -> The only available placeholder currently (see below for more information)
+		seed_prefix = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
+	}
+}
+```
+### Optional
+- `seed_prefix` (String) It gets appended to each seed of any `value_is_fully_known` (resource) or `value_is_known` (resource) within the same module.
+
+	**Placeholders**:
+	- "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
+	recommended because this value won't be drag along the plan and apply phase in comparison to
+	abspath(path.root) that you would add to resource seed where a change to path.root would be
+	recognized just as usual from terraform.
 
 
 
@@ -17,10 +56,12 @@ Allows you to have a access to `result` during plan phase that states whether `v
 
 ### Required
 
-- `value` (Dynamic) The `value` and nested attributes to test against `(known after apply)`
+- `proposed_unknown` (Dynamic) It is very crucial that this field is **not** filled by any custom value except the one produced by `value_unknown_proposer` (resource). This has the reason as its `value` is **always** unknown during the plan phase. On this behaviour this resource must rely and it cannot check if you do not so!
+- `unique_seed` (String) Attention! The seed is being used to determine resource uniqueness prior and during apply-phase. Very important to state is that the **seed must be fully known during the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the **seed of every "value_is_fully_known" must be unique**! I recommend you to use the provider_meta-feature for increased uniqueness. Under certain circumstances you may face problems if you run terraform concurrenctly. If you do so, then I recommend you to pass-through a random value via a user (environment) variable that you then add to the seed.
+- `value` (Dynamic) The `value` and if existing, nested attributes, are tested against "(known after apply)"
 
-### Read-Only
+### Optional
 
-- `result` (Boolean) States whether `value` or any nested attribute is marked as `(known after apply)` or not. If `value` is an aggregate type, not only the top level of the aggregate type is checked; elements and attributes are checked too.
+- `result` (Boolean) States whether `value` or any nested attribute is marked as "(known after apply)" or not. If `value` is an aggregate type, not only the top level of the aggregate type is checked; elements and attributes are checked too.
 
 

@@ -1,34 +1,22 @@
 package provider
 
 import (
-	"context"
-	"os"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
-	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server"
+	"github.com/pseudo-dynamic/terraform-provider-value/isknown/common"
+	isknown "github.com/pseudo-dynamic/terraform-provider-value/isknown/provider"
 )
 
-var providerName = "terraform-provider-value"
-
-// Serve is the default entrypoint for the provider.
-func Serve(ctx context.Context, logger hclog.Logger) error {
-	return tf5server.Serve(providerName, func() tfprotov5.ProviderServer { return &(RawProviderServer{logger: logger}) })
-}
-
-// Provider
-func Provider() func() tfprotov5.ProviderServer {
-	var logLevel string
-	logLevel, ok := os.LookupEnv("TF_LOG")
-
-	if !ok {
-		logLevel = "info"
-	}
-
-	return func() tfprotov5.ProviderServer {
-		return &(RawProviderServer{logger: hclog.New(&hclog.LoggerOptions{
-			Level:  hclog.LevelFromString(logLevel),
-			Output: os.Stderr,
-		})})
-	}
+func Provider() func() tfprotov6.ProviderServer {
+	return isknown.ProviderConstructor(isknown.ProviderParameters{
+		CheckFullyKnown: true,
+	}, common.ProviderResourceSchemaParameters{
+		ResourceName: "value_is_fully_known",
+		ResourceDescription: "Allows you to have a access to `result` during plan phase that " +
+			"states whether `value` or any nested attribute is marked as \"(known after apply)\" or not.",
+		ValueDescription: "The `value` and if existing, nested attributes, are tested against \"(known after apply)\"",
+		ResultDescription: "States whether `value` or any nested attribute is marked as \"(known after apply)\" or not. If `value` is an aggregate " +
+			"type, not only the top level of the aggregate type is checked; elements and attributes " +
+			"are checked too.",
+	})
 }

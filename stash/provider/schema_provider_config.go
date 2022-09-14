@@ -1,14 +1,14 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
 
 // GetProviderConfigSchema contains the definitions of all configuration attributes
-func GetProviderConfigSchema() *tfprotov5.Schema {
-	b := tfprotov5.SchemaBlock{}
+func GetProviderConfigSchema() *tfprotov6.Schema {
+	b := tfprotov6.SchemaBlock{}
 
-	return &tfprotov5.Schema{
+	return &tfprotov6.Schema{
 		Version: 0,
 		Block:   &b,
 	}

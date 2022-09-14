@@ -3,22 +3,24 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 )
 
+type Provider struct {
+}
+
 type ProviderWithTraits interface {
 	provider.ProviderWithMetadata
 	provider.ProviderWithResources
+	provider.ProviderWithDataSources
 }
 
 // Provider schema struct
 type ProviderConfig struct {
-}
-
-type Provider struct {
 }
 
 func NewProvider() ProviderWithTraits {
@@ -54,10 +56,17 @@ func (p *Provider) Resources(_ context.Context) []func() resource.Resource {
 		func() resource.Resource {
 			return NewReplacedWhenResource()
 		},
+		func() resource.Resource {
+			return NewUnknownProposerResource()
+		},
 	}
 }
 
-// // GetDataSources - Defines provider data sources
-// func (p *providerType) GetDataSources(_ context.Context) (map[string]datasource.DataSource, diag.Diagnostics) {
-// 	return map[string]datasource.DataSource{}, nil
-// }
+// DataSources implements ProviderWithTraits
+func (*Provider) DataSources(context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{
+		func() datasource.DataSource {
+			return NewTempDirDataSource()
+		},
+	}
+}

@@ -17,10 +17,10 @@ Allows you to treat a value as unknown. This is desirable when you want postcond
 
 ### Required
 
-- `value` (Dynamic) The value to promise. Any (nested) change to `value` results into `result` to be marked as `(known after apply)`
+- `value` (Dynamic) The value to promise. Any (nested) change to `value` results into `result` to be marked as "(known after apply)"
 
 ### Read-Only
 
-- `result` (Dynamic) `result` is as soon as you apply set to `value`. Every change of `value` results into `result` to be marked as `(known after apply)`
+- `result` (Dynamic) `result` is as soon as you apply set to `value`. Every change of `value` results into `result` to be marked as "(known after apply)"
 
 

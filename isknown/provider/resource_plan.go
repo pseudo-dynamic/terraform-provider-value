@@ -2,107 +2,150 @@ package provider
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/uuid"
+
+	"github.com/pseudo-dynamic/terraform-provider-value/isknown/common"
 )
 
 // PlanResourceChange function
-func (s *RawProviderServer) PlanResourceChange(ctx context.Context, request *tfprotov5.PlanResourceChangeRequest) (*tfprotov5.PlanResourceChangeResponse, error) {
-	response := &tfprotov5.PlanResourceChangeResponse{}
+func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprotov6.PlanResourceChangeRequest) (*tfprotov6.PlanResourceChangeResponse, error) {
+	var isErroneous bool
+	var isWorking bool
+	var diags []*tfprotov6.Diagnostic
+
+	resp := &tfprotov6.PlanResourceChangeResponse{}
 	execDiag := s.canExecute()
 
 	if len(execDiag) > 0 {
-		response.Diagnostics = append(response.Diagnostics, execDiag...)
-		return response, nil
+		resp.Diagnostics = append(resp.Diagnostics, execDiag...)
+		return resp, nil
 	}
 
-	resourceType, err := GetResourceType(request.TypeName)
+	resourceType := getResourceType(req.TypeName)
 
-	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Failed to determine planned resource type",
-			Detail:   err.Error(),
-		})
-
-		return response, nil
+	proposedValueDynamic := req.ProposedNewState
+	var proposedValue tftypes.Value
+	var proposedValueMap map[string]tftypes.Value
+	if proposedValue, proposedValueMap, diags, isErroneous = common.UnmarshalState(proposedValueDynamic, resourceType); isErroneous {
+		resp.Diagnostics = append(resp.Diagnostics, diags...)
+		return resp, nil
 	}
+	_ = proposedValueMap
 
-	// Decode proposed resource state
-	proposedState, err := request.ProposedNewState.Unmarshal(resourceType)
-
-	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Failed to unmarshal planned resource state",
-			Detail:   err.Error(),
-		})
-
-		return response, nil
+	configValueDynamic := req.Config
+	var configValue tftypes.Value
+	var configValueMap map[string]tftypes.Value
+	if configValue, configValueMap, diags, isErroneous = common.UnmarshalState(configValueDynamic, resourceType); isErroneous {
+		resp.Diagnostics = append(resp.Diagnostics, diags...)
+		return resp, nil
 	}
+	_ = configValue
+	_ = configValueMap
 
-	proposedValueMap := make(map[string]tftypes.Value)
-	err = proposedState.As(&proposedValueMap)
-
-	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Failed to extract planned resource state from tftypes.Value",
-			Detail:   err.Error(),
-		})
-
-		return response, nil
-	}
-
-	// Decode prior resource state
-	priorState, err := request.PriorState.Unmarshal(resourceType)
-
-	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Failed to unmarshal prior resource state",
-			Detail:   err.Error(),
-		})
-
-		return response, nil
-	}
-
-	s.logger.Trace("[PlanResourceChange]", "[PriorState]", dump(priorState))
-	priorValueMap := make(map[string]tftypes.Value)
-	err = priorState.As(&priorValueMap)
-
-	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
-			Summary:  "Failed to extract prior resource state from tftypes.Value",
-			Detail:   err.Error(),
-		})
-
-		return response, nil
-	}
-
-	if proposedState.IsNull() {
+	if proposedValue.IsNull() {
 		// Plan to delete the resource
-		response.PlannedState = request.ProposedNewState
-		return response, nil
+		resp.PlannedState = proposedValueDynamic
+		return resp, nil
 	}
 
-	proposedValueMap["result"] = tftypes.NewValue(tftypes.Bool, proposedValueMap["value"].IsKnown())
-	customPlannedValue := tftypes.NewValue(proposedState.Type(), proposedValueMap)
-	s.logger.Trace("[PlanResourceChange]", "new planned state", dump(customPlannedValue))
-	customPlannedState, err := tfprotov5.NewDynamicValue(resourceType, customPlannedValue)
+	var seedPrefix string
+	if seedPrefix, diags, isWorking = common.CanGetSeedPrefix(req.ProviderMeta); !isWorking {
+		resp.Diagnostics = append(resp.Diagnostics, diags...)
+		return resp, nil
+	}
+	_ = seedPrefix
+
+	uniqueSeedValue := proposedValueMap["unique_seed"]
+	if !uniqueSeedValue.IsKnown() {
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
+			Summary:  "Current state of resource has a 'seed' attribute but it is not known.",
+			Detail:   "The 'seed' attribute must be known during the plan phase. See attribute description for more informations.",
+		})
+
+		return resp, nil
+	}
+	var uniqueSeed string
+	_ = uniqueSeedValue.As(&uniqueSeed) // Why it should ever fail?
+
+	combinedSeed := seedPrefix + uniqueSeed
+	isPlanPhase := !proposedValueMap["proposed_unknown"].IsKnown() // Unknown == plan
+
+	providerTempDir := filepath.Join(os.TempDir(), "tf-provider-"+req.TypeName)
+	if _, err := os.Stat(providerTempDir); os.IsNotExist(err) {
+		os.MkdirAll(providerTempDir, 0700) // Create your file
+	}
+
+	deterministicFileName := uuid.DeterministicUuidFromString(combinedSeed).String()
+	deterministicTempFilePath := filepath.Join(providerTempDir, deterministicFileName)
+	var isValueKnown bool
+
+	if isPlanPhase {
+		// This is the plan phase
+		if s.params.CheckFullyKnown {
+			isValueKnown = proposedValueMap["value"].IsFullyKnown()
+		} else {
+			isValueKnown = proposedValueMap["value"].IsKnown()
+		}
+
+		var isValueFullyKnownByte byte
+		if isValueKnown {
+			isValueFullyKnownByte = 1
+		}
+
+		deterministicFile, err := os.OpenFile(deterministicTempFilePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0600)
+
+		if err == nil {
+			defer deterministicFile.Close()
+			_, err = deterministicFile.Write([]byte{isValueFullyKnownByte})
+		}
+
+		if err != nil {
+			resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+				Severity: tfprotov6.DiagnosticSeverityError,
+				Summary:  "Error while working with file in the plan phase",
+				Detail:   err.Error(),
+			})
+
+			return resp, nil
+		}
+	} else {
+		readBytes, err := os.ReadFile(deterministicTempFilePath)
+
+		if err != nil {
+			resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+				Severity: tfprotov6.DiagnosticSeverityError,
+				Summary:  "Error while working with the file in the apply phase",
+				Detail:   err.Error(),
+			})
+
+			return resp, nil
+		}
+
+		readByte := readBytes[0]
+		isValueKnown = readByte == 1
+		os.Remove(deterministicTempFilePath)
+	}
+
+	proposedValueMap["result"] = tftypes.NewValue(tftypes.Bool, isValueKnown)
+	plannedValue := tftypes.NewValue(proposedValue.Type(), proposedValueMap)
+	plannedState, err := tfprotov6.NewDynamicValue(resourceType, plannedValue)
 
 	if err != nil {
-		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
-			Severity: tfprotov5.DiagnosticSeverityError,
+		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to assemble proposed state during plan",
 			Detail:   err.Error(),
 		})
-
-		return response, nil
 	}
 
-	response.PlannedState = &customPlannedState
-	return response, nil
+	// pass-through
+	// resp.PlannedState = &newValueDynamic
+	resp.PlannedState = &plannedState
+	return resp, nil
 }
