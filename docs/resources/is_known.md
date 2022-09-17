@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   Allows you to have a access to result during plan phase that states whether value marked as "(known after apply)" or not.
   Provider Metadata
-  Each module can use provider_meta. Beware that these settings only count for resources of this module. (see https://www.terraform.io/internals/provider-meta):
+  Each module can use provider_meta. Please keep in mind that these settings only count for resources of this module! (see https://www.terraform.io/internals/provider-meta):
   terraform
   // Terraform provider_meta example
   terraform {
@@ -20,8 +20,8 @@ description: |-
   seed_prefix (String) It gets appended to each seed of any value_is_fully_known (resource) or value_is_known (resource) within the same module.
   Placeholders:
   "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
-  recommended because this value won't be drag along the plan and apply phase in comparison to
-  abspath(path.root) that you would add to resource seed where a change to path.root would be
+  recommended because this value won't be dragged along the plan and apply phase in comparison to
+  "abspath(path.root)" that you would add to resource seed where a change to path.root would be
   recognized just as usual from terraform.
 ---
 
@@ -29,7 +29,7 @@ description: |-
 
 Allows you to have a access to `result` during plan phase that states whether `value` marked as "(known after apply)" or not.
 ## Provider Metadata
-Each module can use provider_meta. Beware that these settings only count for resources of this module. (see https://www.terraform.io/internals/provider-meta):
+Each module can use provider_meta. Please keep in mind that these settings only count for resources of this module! (see https://www.terraform.io/internals/provider-meta):
 ```terraform
 // Terraform provider_meta example
 terraform {
@@ -45,8 +45,8 @@ terraform {
 
 	**Placeholders**:
 	- "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
-	recommended because this value won't be drag along the plan and apply phase in comparison to
-	abspath(path.root) that you would add to resource seed where a change to path.root would be
+	recommended because this value won't be dragged along the plan and apply phase in comparison to
+	"abspath(path.root)" that you would add to resource seed where a change to path.root would be
 	recognized just as usual from terraform.
 
 

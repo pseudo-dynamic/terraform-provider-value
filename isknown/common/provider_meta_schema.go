@@ -49,8 +49,8 @@ func getObjectTypeFromSchema(schema *tfprotov6.Schema) tftypes.Type {
 }
 
 var seedPrefixDescription = "## Provider Metadata\n" +
-	"Each module can use provider_meta. Beware that these settings only count " +
-	"for resources of this module. (see https://www.terraform.io/internals/provider-meta):\n" +
+	"Each module can use provider_meta. Please keep in mind that these settings only count " +
+	"for resources of this module! (see https://www.terraform.io/internals/provider-meta):\n" +
 	"```terraform\n" + `// Terraform provider_meta example
 terraform {
 	// "value" is the provider name
@@ -64,8 +64,8 @@ terraform {
 	"`value_is_known` (resource) within the same module.\n" + `
 	**Placeholders**:
 	- "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
-	recommended because this value won't be drag along the plan and apply phase in comparison to
-	abspath(path.root) that you would add to resource seed where a change to path.root would be
+	recommended because this value won't be dragged along the plan and apply phase in comparison to
+	"abspath(path.root)" that you would add to resource seed where a change to path.root would be
 	recognized just as usual from terraform.`
 
 func GetProviderMetaSchema() *tfprotov6.Schema {
