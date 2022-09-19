@@ -4,12 +4,14 @@ import (
 	"context"
 	"log"
 
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/goproviderconfig"
+
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
 
 // GetProviderSchema function
 func (s *RawProviderServer) GetProviderSchema(ctx context.Context, req *tfprotov6.GetProviderSchemaRequest) (*tfprotov6.GetProviderSchemaResponse, error) {
-	cfgSchema := GetProviderConfigSchema()
+	cfgSchema := goproviderconfig.GetProviderConfigSchema()
 	resSchema := GetProviderResourceSchema()
 
 	log.Println("--------------------------GetProviderSchema Called------------------------------")

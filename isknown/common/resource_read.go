@@ -5,8 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
-// CanReadResource function
-func CanReadResource(
+// TryReadResource function
+func TryReadResource(
 	currentState *tfprotov6.DynamicValue,
 	resourceType tftypes.Type,
 	resp *tfprotov6.ReadResourceResponse) (
@@ -16,9 +16,8 @@ func CanReadResource(
 	var currentStateValue tftypes.Value
 	var currentStateValueMap map[string]tftypes.Value
 	var err error
-	currentStateValue, err = currentState.Unmarshal(resourceType)
 
-	if err != nil {
+	if currentStateValue, err = currentState.Unmarshal(resourceType); err != nil {
 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
 			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to decode current state",
@@ -38,9 +37,7 @@ func CanReadResource(
 		return currentStateValue, currentStateValueMap, false
 	}
 
-	err = currentStateValue.As(&currentStateValueMap)
-
-	if err != nil {
+	if err = currentStateValue.As(&currentStateValueMap); err != nil {
 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
 			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Failed to extract resource from current state",
@@ -50,9 +47,7 @@ func CanReadResource(
 		return currentStateValue, currentStateValueMap, false
 	}
 
-	_, isValueExisting := currentStateValueMap["value"]
-
-	if !isValueExisting {
+	if _, isValueExisting := currentStateValueMap["value"]; !isValueExisting {
 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
 			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Current state of resource has no 'value' attribute",
@@ -62,9 +57,7 @@ func CanReadResource(
 		return currentStateValue, currentStateValueMap, false
 	}
 
-	_, isResultExisting := currentStateValueMap["result"]
-
-	if !isResultExisting {
+	if _, isResultExisting := currentStateValueMap["result"]; !isResultExisting {
 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
 			Severity: tfprotov6.DiagnosticSeverityError,
 			Summary:  "Current state of resource has no 'result' attribute",
@@ -74,27 +67,15 @@ func CanReadResource(
 		return currentStateValue, currentStateValueMap, false
 	}
 
-	_, isSeedExisting := currentStateValueMap["seed"]
-
-	if !isSeedExisting {
+	if _, isGuidSeedExisting := currentStateValueMap["guid_seed"]; !isGuidSeedExisting {
 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
 			Severity: tfprotov6.DiagnosticSeverityError,
-			Summary:  "Current state of resource has no 'seed' attribute",
+			Summary:  "Current state of resource has no 'guid_seed' attribute",
 			Detail:   "This should not happen. The state may be incomplete or corrupted.\nIf this error is reproducible, please report issue to provider maintainers.",
 		})
 
 		return currentStateValue, currentStateValueMap, false
 	}
-
-	// if !currentStateValueMap["seed"].IsFullyKnown() {
-	// 	resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
-	// 		Severity: tfprotov6.DiagnosticSeverityError,
-	// 		Summary:  "Current state of resource has a 'seed' attribute but it is not fully known.",
-	// 		Detail:   "This should not happen. The state may be incomplete or corrupted.\nIf this error is reproducible, please report issue to provider maintainers.",
-	// 	})
-
-	// 	return currentStateValue, currentStateValueMap, false
-	// }
 
 	return currentStateValue, currentStateValueMap, true
 }

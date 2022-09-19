@@ -1,12 +1,18 @@
-// This example is incomplete. Please take a look at provider_meta.tf and shared.tf too!
+// This example is complete but there are additional features implemented in terraform.tf!
+
+resource "value_unknown_proposer" "known_with_nested_unknown" {}
+
+resource "value_promise" "known_with_nested_unknown" {
+  value = "test"
+}
 
 resource "value_is_known" "known_with_nested_unknown" {
   value = {
-    nested = value_promise.default.result
+    nested = value_promise.known_with_nested_unknown.result
   }
 
-  unique_seed      = "nested_known"
-  proposed_unknown = value_unknown_proposer.default.value
+  guid_seed        = "nested_unknown"
+  proposed_unknown = value_unknown_proposer.known_with_nested_unknown.value
 }
 
 output "is_known_with_nested_unknown_value" {

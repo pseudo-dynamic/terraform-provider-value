@@ -1,13 +1,15 @@
-# // This example is incomplete. Please take a look at provider_meta.tf and shared.tf too!
+// This example is complete but there are additional features implemented in terraform.tf!
 
-# resource "value_is_known" "known" {
-#   value            = "test"
-#   unique_seed      = "known"
-#   proposed_unknown = value_unknown_proposer.default.value
-# }
+resource "value_unknown_proposer" "known" {}
 
-# output "is_known_value" {
-#   value = {
-#     known = value_is_known.known.result
-#   }
-# }
+resource "value_is_known" "known" {
+  value            = "test"
+  guid_seed        = "known"
+  proposed_unknown = value_unknown_proposer.known.value
+}
+
+output "is_known_value" {
+  value = {
+    known = value_is_known.known.result
+  }
+}

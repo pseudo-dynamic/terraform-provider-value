@@ -10,6 +10,12 @@ import (
 
 const minTFVersion string = "v0.14.8"
 
+// ValidateProviderConfig function
+func (s *RawProviderServer) ValidateProviderConfig(ctx context.Context, req *tfprotov6.ValidateProviderConfigRequest) (*tfprotov6.ValidateProviderConfigResponse, error) {
+	resp := &tfprotov6.ValidateProviderConfigResponse{PreparedConfig: req.Config}
+	return resp, nil
+}
+
 // ConfigureProvider function
 func (s *RawProviderServer) ConfigureProvider(ctx context.Context, req *tfprotov6.ConfigureProviderRequest) (*tfprotov6.ConfigureProviderResponse, error) {
 	return &tfprotov6.ConfigureProviderResponse{}, nil

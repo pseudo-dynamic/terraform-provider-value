@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	internal "github.com/pseudo-dynamic/terraform-provider-value/internal/provider"
-	"github.com/pseudo-dynamic/terraform-provider-value/isknown/common"
+	internal "github.com/pseudo-dynamic/terraform-provider-value/internal/fwkprovider"
+	isfullyknown "github.com/pseudo-dynamic/terraform-provider-value/isfullyknown/provider"
 	isknown "github.com/pseudo-dynamic/terraform-provider-value/isknown/provider"
 	promise "github.com/pseudo-dynamic/terraform-provider-value/promise/provider"
 	stash "github.com/pseudo-dynamic/terraform-provider-value/stash/provider"
@@ -22,31 +22,8 @@ import (
 func main() {
 	stashProvider := stash.Provider()
 	promiseProvider := promise.Provider()
-
-	isKnownProvider := isknown.ProviderConstructor(isknown.ProviderParameters{
-		CheckFullyKnown: false,
-	}, common.ProviderResourceSchemaParameters{
-		ResourceName: "value_is_known",
-		ResourceDescription: "Allows you to have a access to `result` during plan phase that " +
-			"states whether `value` marked as \"(known after apply)\" or not.",
-		ValueDescription: "The `value` (not nested attributes) is test against \"(known after apply)\"",
-		ResultDescription: "States whether `value` is marked as \"(known after apply)\" or not. If `value` is an aggregate " +
-			"type, only the top level of the aggregate type is checked; elements and attributes " +
-			"are not checked.",
-	})
-
-	isFullyKnownProvider := isknown.ProviderConstructor(isknown.ProviderParameters{
-		CheckFullyKnown: true,
-	}, common.ProviderResourceSchemaParameters{
-		ResourceName: "value_is_fully_known",
-		ResourceDescription: "Allows you to have a access to `result` during plan phase that " +
-			"states whether `value` or any nested attribute is marked as \"(known after apply)\" or not.",
-		ValueDescription: "The `value` and if existing, nested attributes, are tested against \"(known after apply)\"",
-		ResultDescription: "States whether `value` or any nested attribute is marked as \"(known after apply)\" or not. If `value` is an aggregate " +
-			"type, not only the top level of the aggregate type is checked; elements and attributes " +
-			"are checked too.",
-	})
-
+	isKnownProvider := isknown.Provider()
+	isFullyKnownProvider := isfullyknown.Provider()
 	internalProvider := providerserver.NewProtocol6(internal.NewProvider())
 	ctx := context.Background()
 

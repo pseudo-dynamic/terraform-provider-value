@@ -1,4 +1,4 @@
-package provider
+package fwkprovider
 
 import (
 	"context"
@@ -12,20 +12,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type ReplacedWhenResource struct {
+type replacedWhenResource struct {
 }
 
-type ReplacedWhenResourceWithTraits interface {
+type replacedWhenResourceWithTraits interface {
 	resource.ResourceWithMetadata
 	resource.ResourceWithGetSchema
 	resource.ResourceWithModifyPlan
 }
 
-func NewReplacedWhenResource() ReplacedWhenResourceWithTraits {
-	return &ReplacedWhenResource{}
+func NewReplacedWhenResource() replacedWhenResourceWithTraits {
+	return &replacedWhenResource{}
 }
 
-func (r ReplacedWhenResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r replacedWhenResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Description: `Enables the scenario to only change a value when a condition is met. 
 The value attribute can for example be used as target for replace_triggered_by. To detect
@@ -79,17 +79,17 @@ unknown and uncomputed again.`,
 	}, nil
 }
 
-type ReplacedWhenState struct {
+type replacedWhenState struct {
 	When  types.Bool   `tfsdk:"condition"`
 	Value types.String `tfsdk:"value"`
 }
 
-func (r *ReplacedWhenResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *replacedWhenResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_replaced_when"
 }
 
 // ModifyPlan implements ReplacedWhenResourceWithTraits
-func (r *ReplacedWhenResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+func (r *replacedWhenResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	if req.Plan.Raw.IsNull() {
 		// Ignore due to resource deletion
 		return
@@ -177,9 +177,9 @@ func (r *ReplacedWhenResource) ModifyPlan(ctx context.Context, req resource.Modi
 }
 
 // Create a new resource
-func (r ReplacedWhenResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r replacedWhenResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan ReplacedWhenState
+	var plan replacedWhenState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 
@@ -196,9 +196,9 @@ func (r ReplacedWhenResource) Create(ctx context.Context, req resource.CreateReq
 }
 
 // Read resource information
-func (r ReplacedWhenResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r replacedWhenResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state ReplacedWhenState
+	var state replacedWhenState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 
@@ -217,9 +217,9 @@ func (r ReplacedWhenResource) Read(ctx context.Context, req resource.ReadRequest
 }
 
 // Update resource
-func (r ReplacedWhenResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r replacedWhenResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Get plan
-	var plan ReplacedWhenState
+	var plan replacedWhenState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 
@@ -237,8 +237,8 @@ func (r ReplacedWhenResource) Update(ctx context.Context, req resource.UpdateReq
 }
 
 // Delete resource
-func (r ReplacedWhenResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state ReplacedWhenState
+func (r replacedWhenResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state replacedWhenState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 

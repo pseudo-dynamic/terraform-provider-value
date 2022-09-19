@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/schema"
+
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"google.golang.org/grpc/codes"
@@ -20,12 +22,6 @@ type RawProviderServer struct {
 	hostTFVersion string
 }
 
-// ValidateProviderConfig function
-func (s *RawProviderServer) ValidateProviderConfig(ctx context.Context, req *tfprotov6.ValidateProviderConfigRequest) (*tfprotov6.ValidateProviderConfigResponse, error) {
-	resp := &tfprotov6.ValidateProviderConfigResponse{PreparedConfig: req.Config}
-	return resp, nil
-}
-
 // ValidateDataResourceConfig function
 func (s *RawProviderServer) ValidateDataResourceConfig(ctx context.Context, req *tfprotov6.ValidateDataResourceConfigRequest) (*tfprotov6.ValidateDataResourceConfigResponse, error) {
 	resp := &tfprotov6.ValidateDataResourceConfigResponse{}
@@ -38,7 +34,7 @@ func (s *RawProviderServer) UpgradeResourceState(ctx context.Context, req *tfpro
 	resp.Diagnostics = []*tfprotov6.Diagnostic{}
 
 	sch := GetProviderResourceSchema()
-	rt := GetObjectTypeFromSchema(sch[req.TypeName])
+	rt := schema.GetObjectTypeFromSchema(sch[req.TypeName])
 
 	rv, err := req.RawState.Unmarshal(rt)
 

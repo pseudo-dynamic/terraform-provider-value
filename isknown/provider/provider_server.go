@@ -4,15 +4,10 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/schema"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-// ValidateProviderConfig function
-func (s *UserProviderServer) ValidateProviderConfig(ctx context.Context, req *tfprotov6.ValidateProviderConfigRequest) (*tfprotov6.ValidateProviderConfigResponse, error) {
-	resp := &tfprotov6.ValidateProviderConfigResponse{PreparedConfig: req.Config}
-	return resp, nil
-}
 
 // UpgradeResourceState isn't really useful in this provider, but we have to loop the state back through to keep Terraform happy.
 func (s *UserProviderServer) UpgradeResourceState(ctx context.Context, req *tfprotov6.UpgradeResourceStateRequest) (*tfprotov6.UpgradeResourceStateResponse, error) {
@@ -20,7 +15,7 @@ func (s *UserProviderServer) UpgradeResourceState(ctx context.Context, req *tfpr
 	resp.Diagnostics = []*tfprotov6.Diagnostic{}
 
 	sch := getProviderResourceSchema(req.TypeName)
-	rt := getObjectTypeFromSchema(sch[req.TypeName])
+	rt := schema.GetObjectTypeFromSchema(sch[req.TypeName])
 
 	rv, err := req.RawState.Unmarshal(rt)
 

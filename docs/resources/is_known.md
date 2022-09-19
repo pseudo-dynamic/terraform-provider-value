@@ -5,19 +5,19 @@ subcategory: ""
 description: |-
   Allows you to have a access to result during plan phase that states whether value marked as "(known after apply)" or not.
   Provider Metadata
-  Each module can use provider_meta. Please keep in mind that these settings only count for resources of this module! (see https://www.terraform.io/internals/provider-meta):
-  terraform
-  // Terraform provider_meta example
-  terraform {
-      // "value" is the provider name
-      provider_meta "value" {
-          // {workdir} -> The only available placeholder currently (see below for more information)
-          seed_prefix = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
+  Each module can use providermeta. Please keep in mind that these settings only count for resources of this module! (see https://www.terraform.io/internals/provider-meta https://www.terraform.io/internals/provider-meta):
+  ```terraform
+  // Terraform providermeta example
+      terraform {
+          // "value" is the provider name
+          providermeta "value" {
+              // {workdir} -> The only available placeholder currently (see below for more information)
+              guidseed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
+          }
       }
-  }
-  
+  ```
   Optional
-  seed_prefix (String) It gets appended to each seed of any value_is_fully_known (resource) or value_is_known (resource) within the same module.
+  guid_seed_addition (String) It serves as addition to each seed of any value_is_fully_known (resource) or value_is_known (resource) within the project if specified in provider, or within the same module if specified in provider-meta.
   Placeholders:
   "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
   recommended because this value won't be dragged along the plan and apply phase in comparison to
@@ -29,19 +29,19 @@ description: |-
 
 Allows you to have a access to `result` during plan phase that states whether `value` marked as "(known after apply)" or not.
 ## Provider Metadata
-Each module can use provider_meta. Please keep in mind that these settings only count for resources of this module! (see https://www.terraform.io/internals/provider-meta):
+Each module can use provider_meta. Please keep in mind that these settings only count for resources of this module! (see [https://www.terraform.io/internals/provider-meta](https://www.terraform.io/internals/provider-meta)):
 ```terraform
 // Terraform provider_meta example
-terraform {
-	// "value" is the provider name
-	provider_meta "value" {
-		// {workdir} -> The only available placeholder currently (see below for more information)
-		seed_prefix = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
+	terraform {
+		// "value" is the provider name
+		provider_meta "value" {
+			// {workdir} -> The only available placeholder currently (see below for more information)
+			guid_seed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
+		}
 	}
-}
 ```
 ### Optional
-- `seed_prefix` (String) It gets appended to each seed of any `value_is_fully_known` (resource) or `value_is_known` (resource) within the same module.
+- `guid_seed_addition` (String) It serves as addition to each seed of any `value_is_fully_known` (resource) or `value_is_known` (resource) within the project if specified in provider, or within the same module if specified in provider-meta.
 
 	**Placeholders**:
 	- "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
@@ -56,8 +56,8 @@ terraform {
 
 ### Required
 
+- `guid_seed` (String) Attention! The seed is being used to determine resource uniqueness prior (first plan phase) and during apply phase (second plan phase). Very important to state is that the **seed must be fully known during the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the **seed of every "value_is_known" must be unique**! I really recommend you to use the provider configuration and/or provider_meta configuration to increase resource uniqueness. Besides `guid_seed`, the provider configuration seed, the provider_meta configuration seed and the resource type itself will become part of the final seed. Under certain circumstances you may face problems if you run terraform concurrenctly. If you do so, then I recommend you to pass-through a random value via a user (environment) variable that you then add to the seed.
 - `proposed_unknown` (Dynamic) It is very crucial that this field is **not** filled by any custom value except the one produced by `value_unknown_proposer` (resource). This has the reason as its `value` is **always** unknown during the plan phase. On this behaviour this resource must rely and it cannot check if you do not so!
-- `unique_seed` (String) Attention! The seed is being used to determine resource uniqueness prior and during apply-phase. Very important to state is that the **seed must be fully known during the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the **seed of every "value_is_known" must be unique**! I recommend you to use the provider_meta-feature for increased uniqueness. Under certain circumstances you may face problems if you run terraform concurrenctly. If you do so, then I recommend you to pass-through a random value via a user (environment) variable that you then add to the seed.
 - `value` (Dynamic) The `value` (not nested attributes) is test against "(known after apply)"
 
 ### Optional

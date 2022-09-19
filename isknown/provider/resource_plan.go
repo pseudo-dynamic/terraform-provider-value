@@ -7,8 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"github.com/pseudo-dynamic/terraform-provider-value/internal/uuid"
 
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/schema"
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/uuid"
 	"github.com/pseudo-dynamic/terraform-provider-value/isknown/common"
 )
 
@@ -31,21 +32,20 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 	proposedValueDynamic := req.ProposedNewState
 	var proposedValue tftypes.Value
 	var proposedValueMap map[string]tftypes.Value
-	if proposedValue, proposedValueMap, diags, isErroneous = common.UnmarshalState(proposedValueDynamic, resourceType); isErroneous {
+	if proposedValue, proposedValueMap, diags, isErroneous = schema.UnmarshalState(proposedValueDynamic, resourceType); isErroneous {
 		resp.Diagnostics = append(resp.Diagnostics, diags...)
 		return resp, nil
 	}
-	_ = proposedValueMap
 
-	configValueDynamic := req.Config
-	var configValue tftypes.Value
-	var configValueMap map[string]tftypes.Value
-	if configValue, configValueMap, diags, isErroneous = common.UnmarshalState(configValueDynamic, resourceType); isErroneous {
-		resp.Diagnostics = append(resp.Diagnostics, diags...)
-		return resp, nil
-	}
-	_ = configValue
-	_ = configValueMap
+	// configValueDynamic := req.Config
+	// var configValue tftypes.Value
+	// var configValueMap map[string]tftypes.Value
+	// if configValue, configValueMap, diags, isErroneous = schema.UnmarshalState(configValueDynamic, resourceType); isErroneous {
+	// 	resp.Diagnostics = append(resp.Diagnostics, diags...)
+	// 	return resp, nil
+	// }
+	// _ = configValue
+	// _ = configValueMap
 
 	if proposedValue.IsNull() {
 		// Plan to delete the resource
@@ -53,27 +53,30 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 		return resp, nil
 	}
 
-	var seedPrefix string
-	if seedPrefix, diags, isWorking = common.CanGetSeedPrefix(req.ProviderMeta); !isWorking {
+	var providerMetaSeedAddition string
+	if providerMetaSeedAddition, diags, isWorking = common.TryExtractProviderMetaGuidSeedAddition(req.ProviderMeta); !isWorking {
 		resp.Diagnostics = append(resp.Diagnostics, diags...)
 		return resp, nil
 	}
-	_ = seedPrefix
 
-	uniqueSeedValue := proposedValueMap["unique_seed"]
-	if !uniqueSeedValue.IsKnown() {
+	guidSeedValue := proposedValueMap["guid_seed"]
+	if !guidSeedValue.IsKnown() {
 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
 			Severity: tfprotov6.DiagnosticSeverityError,
-			Summary:  "Current state of resource has a 'seed' attribute but it is not known.",
-			Detail:   "The 'seed' attribute must be known during the plan phase. See attribute description for more informations.",
+			Summary:  "Current resource state has a 'guid_seed' attribute but it is not known.",
+			Detail:   "The 'guid_seed' attribute must be known during the plan phase. See attribute description for more informations.",
 		})
 
 		return resp, nil
 	}
-	var uniqueSeed string
-	_ = uniqueSeedValue.As(&uniqueSeed) // Why it should ever fail?
+	var guidSeed string
+	_ = guidSeedValue.As(&guidSeed) // Why it should ever fail?
 
-	combinedSeed := seedPrefix + uniqueSeed
+	combinedSeed := s.ProviderConfigSeedAddition + "|" +
+		providerMetaSeedAddition + "|" +
+		req.TypeName + "|" +
+		guidSeed
+
 	isPlanPhase := !proposedValueMap["proposed_unknown"].IsKnown() // Unknown == plan
 
 	providerTempDir := filepath.Join(os.TempDir(), "tf-provider-"+req.TypeName)

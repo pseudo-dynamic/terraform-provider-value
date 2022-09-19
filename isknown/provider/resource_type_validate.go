@@ -59,13 +59,13 @@ func (s *UserProviderServer) ValidateResourceConfig(ctx context.Context, req *tf
 		return resp, nil
 	}
 
-	_, ok = configVal["unique_seed"]
+	_, ok = configVal["guid_seed"]
 
 	if !ok {
 		resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
 			Severity:  tfprotov6.DiagnosticSeverityError,
 			Summary:   "Unique seed missing from resource configuration",
-			Detail:    "A unique_seed attribute containing a valid terraform value is required.",
+			Detail:    "A guid_seed attribute containing a valid terraform value is required.",
 			Attribute: att,
 		})
 

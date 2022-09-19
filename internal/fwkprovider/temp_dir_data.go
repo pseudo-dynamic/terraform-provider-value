@@ -1,4 +1,4 @@
-package provider
+package fwkprovider
 
 import (
 	"context"
@@ -10,18 +10,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type TempDirDataSource struct {
+type tempDirDataSource struct {
 }
 
-type TempDirDataSourceWithTraits interface {
+type tempDirDataSourceWithTraits interface {
 	datasource.DataSource
 }
 
-func NewTempDirDataSource() TempDirDataSourceWithTraits {
-	return &TempDirDataSource{}
+func NewTempDirDataSource() tempDirDataSourceWithTraits {
+	return &tempDirDataSource{}
 }
 
-func (r TempDirDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r tempDirDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Description: "Simply returns the OS-dependent temporary directory (e.g. /tmp).",
 		Attributes: map[string]tfsdk.Attribute{
@@ -34,18 +34,18 @@ func (r TempDirDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diag
 	}, nil
 }
 
-func (r *TempDirDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (r *tempDirDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_temp_dir"
 }
 
-type TempDirState struct {
+type tempDirState struct {
 	Path types.String `tfsdk:"path"`
 }
 
 // Read resource information
-func (r TempDirDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (r tempDirDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	// Get current state
-	var state TempDirState
+	var state tempDirState
 	diags := req.Config.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 

@@ -15,9 +15,10 @@ type UserProviderServer struct {
 	// such as instances of the Kubernetes clients, configuration options needed at runtime.
 	logger hclog.Logger
 	//providerEnabled bool
-	hostTFVersion        string
-	params               ProviderParameters
-	resourceSchemaParams common.ProviderResourceSchemaParameters
+	hostTFVersion              string
+	params                     ProviderParameters
+	resourceSchemaParams       common.ProviderResourceSchemaParameters
+	ProviderConfigSeedAddition string
 }
 
 type ProviderParameters struct {

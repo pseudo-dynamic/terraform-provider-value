@@ -1,4 +1,4 @@
-package provider
+package fwkprovider
 
 import (
 	"context"
@@ -9,20 +9,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type UnknownProposerResource struct {
+type unknownProposerResource struct {
 }
 
-type UnknownProposerResourceWithTraits interface {
+type unknownProposerResourceWithTraits interface {
 	resource.ResourceWithMetadata
 	resource.ResourceWithGetSchema
 	resource.ResourceWithModifyPlan
 }
 
-func NewUnknownProposerResource() UnknownProposerResourceWithTraits {
-	return &UnknownProposerResource{}
+func NewUnknownProposerResource() unknownProposerResourceWithTraits {
+	return &unknownProposerResource{}
 }
 
-func (r UnknownProposerResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r unknownProposerResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Version: 0,
 		Description: "This resource is very obscure and misbehaving and you really should only use " +
@@ -37,22 +37,22 @@ func (r UnknownProposerResource) GetSchema(_ context.Context) (tfsdk.Schema, dia
 	}, nil
 }
 
-type UnknownProposerState struct {
+type unknownProposerState struct {
 	Value types.Bool `tfsdk:"value"`
 }
 
-func (r *UnknownProposerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *unknownProposerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_unknown_proposer"
 }
 
 // ModifyPlan implements UnknownProposerResourceWithTraits
-func (r *UnknownProposerResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+func (r *unknownProposerResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	if req.Config.Raw.IsNull() {
 		// Ignore due to resource deletion
 		return
 	}
 
-	var plan UnknownProposerState
+	var plan unknownProposerState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 
@@ -66,8 +66,8 @@ func (r *UnknownProposerResource) ModifyPlan(ctx context.Context, req resource.M
 }
 
 // Create a new resource
-func (r UnknownProposerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan UnknownProposerState
+func (r unknownProposerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan unknownProposerState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 
@@ -81,9 +81,9 @@ func (r UnknownProposerResource) Create(ctx context.Context, req resource.Create
 }
 
 // Read resource information
-func (r UnknownProposerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r unknownProposerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state UnknownProposerState
+	var state unknownProposerState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 
@@ -96,9 +96,9 @@ func (r UnknownProposerResource) Read(ctx context.Context, req resource.ReadRequ
 }
 
 // Update resource
-func (r UnknownProposerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r unknownProposerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Get plan
-	var plan UnknownProposerState
+	var plan unknownProposerState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 
@@ -112,8 +112,8 @@ func (r UnknownProposerResource) Update(ctx context.Context, req resource.Update
 }
 
 // Delete resource
-func (r UnknownProposerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state UnknownProposerState
+func (r unknownProposerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state unknownProposerState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 

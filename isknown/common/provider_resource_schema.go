@@ -18,7 +18,7 @@ func GetProviderResourceSchema(schema ProviderResourceSchemaParameters) map[stri
 		schema.ResourceName: {
 			Version: 1,
 			Block: &tfprotov6.SchemaBlock{
-				Description: schema.ResourceDescription + "\n" + seedPrefixDescription,
+				Description: schema.ResourceDescription + "\n" + getProviderMetaGuidSeedAdditionAttributeDescription(),
 				BlockTypes:  []*tfprotov6.SchemaNestedBlock{},
 				Attributes: []*tfprotov6.SchemaAttribute{
 					{
@@ -30,19 +30,20 @@ func GetProviderResourceSchema(schema ProviderResourceSchemaParameters) map[stri
 						Description: schema.ValueDescription,
 					},
 					{
-						Name:     "unique_seed",
+						Name:     "guid_seed",
 						Type:     tftypes.String,
 						Required: true,
 						Optional: false,
 						Computed: false,
-						Description: "Attention! The seed is being used to determine resource uniqueness prior and " +
-							"during apply-phase. Very important to state is that the **seed must be fully known during " +
-							"the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the **seed " +
-							"of every \"" + schema.ResourceName + "\" must be unique**! I recommend you to use the " +
-							"provider_meta-feature for increased uniqueness. Under certain circumstances you may " +
-							"face problems if you run terraform concurrenctly. If you do so, " +
-							"then I recommend you to pass-through a random value via a user (environment) variable " +
-							"that you then add to the seed.",
+						Description: "Attention! The seed is being used to determine resource uniqueness prior (first plan phase) " +
+							"and during apply phase (second plan phase). Very important to state is that the **seed must be fully " +
+							"known during the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the " +
+							"**seed of every \"" + schema.ResourceName + "\" must be unique**! I really recommend you to use the " +
+							"provider configuration and/or provider_meta configuration to increase resource uniqueness. " +
+							"Besides `guid_seed`, the provider configuration seed, the provider_meta configuration seed and " +
+							"the resource type itself will become part of the final seed. Under certain circumstances you " +
+							"may face problems if you run terraform concurrenctly. If you do so, then I recommend you to " +
+							"pass-through a random value via a user (environment) variable that you then add to the seed.",
 					},
 					{
 						Name:     "proposed_unknown",
