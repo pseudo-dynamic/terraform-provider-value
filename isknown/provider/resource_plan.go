@@ -131,6 +131,7 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 2. this plan method got called the third time`,
 			})
 		} else if err == nil {
+			// ISSUE: end of else if block does not call deferred methods
 			defer deterministicFile.Close() // ignore error intentionally
 			readBytes = make([]byte, 1)
 			deterministicFile.Read(readBytes)
@@ -148,6 +149,7 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 
 		readByte := readBytes[0]
 		isValueKnown = readByte == 1
+		// ISSUE: there is a silent error because file is still opened
 		os.Remove(deterministicTempFilePath)
 	}
 
