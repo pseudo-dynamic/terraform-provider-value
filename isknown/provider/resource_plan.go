@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -118,7 +119,22 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 			return resp, nil
 		}
 	} else {
-		readBytes, err := os.ReadFile(deterministicTempFilePath)
+		deterministicFile, err := os.Open(deterministicTempFilePath)
+		var readBytes []byte
+
+		if errors.Is(err, os.ErrNotExist) {
+			resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{
+				Severity: tfprotov6.DiagnosticSeverityError,
+				Summary:  "File does not exist",
+				Detail: `The file does not exist. This can mean
+1. the file got deleted before apply-phase or
+2. this plan method got called the third time`,
+			})
+		} else if err == nil {
+			defer deterministicFile.Close() // ignore error intentionally
+			readBytes = make([]byte, 1)
+			deterministicFile.Read(readBytes)
+		}
 
 		if err != nil {
 			resp.Diagnostics = append(resp.Diagnostics, &tfprotov6.Diagnostic{

@@ -8,13 +8,13 @@ description: |-
   Each module can use providermeta. Please keep in mind that these settings only count for resources of this module! (see https://www.terraform.io/internals/provider-meta https://www.terraform.io/internals/provider-meta):
   ```terraform
   // Terraform providermeta example
-      terraform {
-          // "value" is the provider name
-          providermeta "value" {
-              // {workdir} -> The only available placeholder currently (see below for more information)
-              guidseed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
-          }
+  terraform {
+      // "value" is the provider name
+      providermeta "value" {
+          // {workdir} -> The only available placeholder currently (see below for more information)
+          guidseed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
       }
+  }
   ```
   Optional
   guid_seed_addition (String) It serves as addition to each seed of any value_is_fully_known (resource) or value_is_known (resource) within the project if specified in provider, or within the same module if specified in provider-meta.
@@ -32,13 +32,13 @@ Allows you to have a access to `result` during plan phase that states whether `v
 Each module can use provider_meta. Please keep in mind that these settings only count for resources of this module! (see [https://www.terraform.io/internals/provider-meta](https://www.terraform.io/internals/provider-meta)):
 ```terraform
 // Terraform provider_meta example
-	terraform {
-		// "value" is the provider name
-		provider_meta "value" {
-			// {workdir} -> The only available placeholder currently (see below for more information)
-			guid_seed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
-		}
+terraform {
+	// "value" is the provider name
+	provider_meta "value" {
+		// {workdir} -> The only available placeholder currently (see below for more information)
+		guid_seed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
 	}
+}
 ```
 ### Optional
 - `guid_seed_addition` (String) It serves as addition to each seed of any `value_is_fully_known` (resource) or `value_is_known` (resource) within the project if specified in provider, or within the same module if specified in provider-meta.

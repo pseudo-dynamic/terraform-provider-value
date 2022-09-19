@@ -30,13 +30,13 @@ func getProviderMetaGuidSeedAdditionAttributeDescription() string {
 		"Each module can use provider_meta. Please keep in mind that these settings only count " +
 		"for resources of this module! (see [https://www.terraform.io/internals/provider-meta](https://www.terraform.io/internals/provider-meta)):\n" +
 		"```terraform\n" + `// Terraform provider_meta example
-	terraform {
-		// "value" is the provider name
-		provider_meta "value" {
-			// {workdir} -> The only available placeholder currently (see below for more information)
-			guid_seed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
-		}
-	}` + "\n```\n" +
+terraform {
+	// "value" is the provider name
+	provider_meta "value" {
+		// {workdir} -> The only available placeholder currently (see below for more information)
+		guid_seed_addition = "{workdir}#for-example" // Results into "/path/to/workdir#for-example"
+	}
+}` + "\n```\n" +
 		"### Optional\n" +
 		"- `guid_seed_addition` (String) " + goproviderconfig.GetGuidSeedAdditionAttributeDescription()
 }
