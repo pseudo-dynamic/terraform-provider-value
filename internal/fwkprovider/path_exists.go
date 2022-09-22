@@ -3,7 +3,6 @@ package fwkprovider
 import (
 	"context"
 	"os"
-	"strconv"
 
 	"github.com/pseudo-dynamic/terraform-provider-value/internal/fwkproviderconfig"
 	"github.com/pseudo-dynamic/terraform-provider-value/internal/goproviderconfig"
@@ -63,9 +62,6 @@ func (r pathExistsResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Dia
 				Type:        types.StringType,
 				Required:    true,
 				Description: goproviderconfig.GetGuidSeedAttributeDescription(pathExistsResourceName),
-				Validators: []tfsdk.AttributeValidator{
-					&fwkproviderconfig.PlanKnownValidator{},
-				},
 			},
 			"exists": {
 				Type:        types.BoolType,
@@ -105,6 +101,10 @@ func (r *pathExistsResource) ModifyPlan(ctx context.Context, req resource.Modify
 	suppliedGuidSeed := config.GuidSeed.Value
 	isPlanPhase := config.ProposedUnknown.IsUnknown()
 
+	if !fwkproviderconfig.ValidatePlanKnownString(config.GuidSeed, "guid_seed", &resp.Diagnostics) {
+		return
+	}
+
 	var providerMetaSeedAddition string
 	var isSuccessful bool
 	if providerMetaSeedAddition, _, isSuccessful = goproviderconfig.TryUnmarshalValueThenExtractGuidSeedAddition(&req.ProviderMeta.Raw); !isSuccessful {
@@ -138,8 +138,6 @@ func (r *pathExistsResource) ModifyPlan(ctx context.Context, req resource.Modify
 		resp.Diagnostics.AddError("Plan cache mechanism failed for exists attribute", err.Error())
 		return
 	}
-
-	resp.Diagnostics.AddWarning("Exists (cached) is unknown: "+strconv.FormatBool(cachedExists.Unknown), "")
 
 	config.Exists = cachedExists
 	resp.Plan.Set(ctx, &config)
