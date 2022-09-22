@@ -3,7 +3,7 @@
 page_title: "value_path_exists Resource - terraform-provider-value"
 subcategory: ""
 description: |-
-  Checks if an OS path exists and caches its computation at plan-time and won't change afterapply-time even the path may have been removed.
+  Checks if an OS path exists and caches its computation at plan-time and won't change after apply-time even the path may have been removed.
   Provider Metadata
   Each module can use providermeta. Please keep in mind that these settings only count for resources of this module! (see https://www.terraform.io/internals/provider-meta https://www.terraform.io/internals/provider-meta):
   ```terraform
@@ -27,7 +27,7 @@ description: |-
 
 # value_path_exists (Resource)
 
-Checks if an OS path exists and caches its computation at plan-time and won't change afterapply-time even the path may have been removed.
+Checks if an OS path exists and caches its computation at plan-time and won't change after apply-time even the path may have been removed.
 ## Provider Metadata
 Each module can use provider_meta. Please keep in mind that these settings only count for resources of this module! (see [https://www.terraform.io/internals/provider-meta](https://www.terraform.io/internals/provider-meta)):
 ```terraform

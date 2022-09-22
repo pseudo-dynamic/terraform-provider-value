@@ -18,7 +18,7 @@ func GetProviderMetaSchema() *tfprotov6.Schema {
 		Version: 0,
 		Block: &tfprotov6.SchemaBlock{
 			Attributes: []*tfprotov6.SchemaAttribute{
-				GetGuidSeedAdditionSchemaAttribute(GetProviderMetaGuidSeedAdditionAttributeDescription()),
+				GetGuidSeedAdditionSchemaAttribute(GetGuidSeedAdditionAttributeDescription()),
 			},
 		},
 	}

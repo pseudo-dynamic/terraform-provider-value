@@ -5,7 +5,26 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/goproviderconfig"
 )
+
+const GuidSeedAdditionAttributeName string = "guid_seed_addition"
+
+func getGuidSeedAdditionAttribute() tfsdk.Attribute {
+	return tfsdk.Attribute{
+		Type:     types.StringType,
+		Required: false,
+		Optional: true,
+		Computed: false,
+		Validators: []tfsdk.AttributeValidator{
+			&PlanKnownValidator{},
+		},
+		PlanModifiers: tfsdk.AttributePlanModifiers{
+			guidSeedAdditionDefaultEmptyModifier{},
+		},
+		Description: goproviderconfig.GetGuidSeedAdditionAttributeDescription(),
+	}
+}
 
 type guidSeedAdditionDefaultEmptyModifier struct{}
 

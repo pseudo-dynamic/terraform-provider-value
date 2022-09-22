@@ -21,6 +21,7 @@ type providerWithTraits interface {
 	fwkprovider.ProviderWithMetadata
 	fwkprovider.ProviderWithResources
 	fwkprovider.ProviderWithDataSources
+	fwkprovider.ProviderWithMetaSchema
 }
 
 // Provider schema struct
@@ -44,6 +45,11 @@ func (p *provider) Metadata(ctx context.Context, req fwkprovider.MetadataRequest
 // GetSchema
 func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return *fwkproviderconfig.GetProviderConfigSchema(), nil
+}
+
+// GetMetaSchema implements providerWithTraits
+func (*provider) GetMetaSchema(context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	return *fwkproviderconfig.GetProviderMetaSchema(), nil
 }
 
 func (p *provider) Configure(ctx context.Context, req fwkprovider.ConfigureRequest, resp *fwkprovider.ConfigureResponse) {

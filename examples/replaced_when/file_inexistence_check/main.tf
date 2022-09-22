@@ -5,6 +5,14 @@ terraform {
       version = "0.1.0"
     }
   }
+
+  provider_meta "value" {
+    guid_seed_addition = "module(file_inexistence_check)"
+  }
+}
+
+provider "value" {
+  guid_seed_addition = "project(file_inexistence_check)"
 }
 
 resource "value_unknown_proposer" "default" {}

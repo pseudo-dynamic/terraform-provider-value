@@ -45,7 +45,7 @@ func (r *pathExistsResource) Configure(ctx context.Context, req resource.Configu
 
 func (r pathExistsResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		Description: "Checks if an OS path exists and caches its computation at plan-time and won't change after" +
+		Description: "Checks if an OS path exists and caches its computation at plan-time and won't change after " +
 			"apply-time even the path may have been removed." + "\n" + goproviderconfig.GetProviderMetaGuidSeedAdditionAttributeDescription(),
 		Attributes: map[string]tfsdk.Attribute{
 			"path": {

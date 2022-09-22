@@ -42,11 +42,17 @@ func TryUnmarshalValueThenExtractGuidSeedAddition(value *tftypes.Value) (string,
 	var diags []*tfprotov6.Diagnostic
 
 	if valueMap, diags, isErroneous = schema.UnmarshalValue(value); isErroneous {
+		diags = append(diags, &tfprotov6.Diagnostic{
+			Severity: tfprotov6.DiagnosticSeverityError,
+			Summary:  "Could unmarshal value to map[string]tftypes.Value",
+			Detail:   "Could unmarshal value to map[string]tftypes.Value to extract guid_seed_addition",
+		})
 		goto Return
 	}
 	_ = value
 
 	if seedAdditionValue, isSuccesful = valueMap["guid_seed_addition"]; !isSuccesful {
+		// Not having guid_seed_addition is fine.
 		goto Return
 	}
 	_ = seedAdditionValue
