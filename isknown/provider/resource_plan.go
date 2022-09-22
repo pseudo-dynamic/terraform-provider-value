@@ -9,9 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/goproviderconfig"
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/guid"
 	"github.com/pseudo-dynamic/terraform-provider-value/internal/schema"
 	"github.com/pseudo-dynamic/terraform-provider-value/internal/uuid"
-	"github.com/pseudo-dynamic/terraform-provider-value/isknown/common"
 )
 
 // PlanResourceChange function
@@ -33,7 +34,7 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 	proposedValueDynamic := req.ProposedNewState
 	var proposedValue tftypes.Value
 	var proposedValueMap map[string]tftypes.Value
-	if proposedValue, proposedValueMap, diags, isErroneous = schema.UnmarshalState(proposedValueDynamic, resourceType); isErroneous {
+	if proposedValue, proposedValueMap, diags, isErroneous = schema.UnmarshalDynamicValue(proposedValueDynamic, resourceType); isErroneous {
 		resp.Diagnostics = append(resp.Diagnostics, diags...)
 		return resp, nil
 	}
@@ -55,7 +56,7 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 	}
 
 	var providerMetaSeedAddition string
-	if providerMetaSeedAddition, diags, isWorking = common.TryExtractProviderMetaGuidSeedAddition(req.ProviderMeta); !isWorking {
+	if providerMetaSeedAddition, diags, isWorking = goproviderconfig.TryExtractProviderMetaGuidSeedAddition(req.ProviderMeta); !isWorking {
 		resp.Diagnostics = append(resp.Diagnostics, diags...)
 		return resp, nil
 	}
@@ -73,19 +74,17 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 	var guidSeed string
 	_ = guidSeedValue.As(&guidSeed) // Why it should ever fail?
 
-	combinedSeed := s.ProviderConfigSeedAddition + "|" +
-		providerMetaSeedAddition + "|" +
-		req.TypeName + "|" +
-		guidSeed
+	composedGuidSeed := guid.ComposeGuidSeed(&s.ProviderConfigSeedAddition,
+		&providerMetaSeedAddition,
+		req.TypeName,
+		"value",
+		&guidSeed)
 
 	isPlanPhase := !proposedValueMap["proposed_unknown"].IsKnown() // Unknown == plan
 
-	providerTempDir := filepath.Join(os.TempDir(), "tf-provider-"+req.TypeName)
-	if _, err := os.Stat(providerTempDir); os.IsNotExist(err) {
-		os.MkdirAll(providerTempDir, 0700) // Create your file
-	}
+	providerTempDir, _ := guid.CreateResourceTempDir(req.TypeName)
 
-	deterministicFileName := uuid.DeterministicUuidFromString(combinedSeed).String()
+	deterministicFileName := uuid.DeterministicUuidFromString(composedGuidSeed).String()
 	deterministicTempFilePath := filepath.Join(providerTempDir, deterministicFileName)
 	var isValueKnown bool
 
@@ -127,7 +126,7 @@ func (s *UserProviderServer) PlanResourceChange(ctx context.Context, req *tfprot
 				Severity: tfprotov6.DiagnosticSeverityError,
 				Summary:  "File does not exist",
 				Detail: `The file does not exist. This can mean
-1. the file got deleted before apply-phase or
+2. the file got deleted before apply-phase because guid collision or
 2. this plan method got called the third time`,
 			})
 		} else if err == nil {

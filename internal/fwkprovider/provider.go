@@ -12,6 +12,8 @@ import (
 	"github.com/pseudo-dynamic/terraform-provider-value/internal/fwkproviderconfig"
 )
 
+const providerName string = "value"
+
 type provider struct {
 }
 
@@ -24,6 +26,10 @@ type providerWithTraits interface {
 // Provider schema struct
 type providerConfig struct {
 	GuidSeedAddition types.String `tfsdk:"guid_seed_addition"`
+}
+
+type providerData struct {
+	GuidSeedAddition *string
 }
 
 func NewProvider() providerWithTraits {
@@ -49,6 +55,10 @@ func (p *provider) Configure(ctx context.Context, req fwkprovider.ConfigureReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	resp.ResourceData = &providerData{
+		GuidSeedAddition: &config.GuidSeedAddition.Value,
+	}
 }
 
 // GetResources - Defines provider resources
@@ -59,6 +69,9 @@ func (p *provider) Resources(_ context.Context) []func() resource.Resource {
 		},
 		func() resource.Resource {
 			return NewUnknownProposerResource()
+		},
+		func() resource.Resource {
+			return NewPathExistsResource()
 		},
 	}
 }

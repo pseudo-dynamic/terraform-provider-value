@@ -16,7 +16,7 @@ func GetProviderConfigSchema() *tfsdk.Schema {
 				Optional: true,
 				Computed: false,
 				Validators: []tfsdk.AttributeValidator{
-					&guidSeedAdditionUnknownValidator{},
+					&PlanKnownValidator{},
 				},
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					guidSeedAdditionDefaultEmptyModifier{},

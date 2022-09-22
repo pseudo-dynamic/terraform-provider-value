@@ -7,17 +7,36 @@ terraform {
   }
 }
 
-resource "value_replaced_when" "findme_inexistence" {
-  for_each = {
+resource "value_unknown_proposer" "default" {}
+
+locals {
+  files = {
     "findme" : {
       fullname = "${path.module}/findme"
     }
   }
-
-  condition = !fileexists(each.value.fullname)
 }
 
-output "findme_inexistence_check" {
-  // On craetion this should contain a non-null value.value
-  value = value_replaced_when.findme_inexistence
+resource "value_path_exists" "findme" {
+  path             = local.files["findme"].fullname
+  guid_seed        = "findme"
+  proposed_unknown = value_unknown_proposer.default.value
+}
+
+resource "value_replaced_when" "findme_inexistence" {
+  condition = !value_path_exists.findme.exists
+}
+
+resource "local_file" "findme" {
+  count    = !value_path_exists.findme.exists ? 1 : 0
+  content  = ""
+  filename = local.files["findme"].fullname
+}
+
+output "is_findme_inexistent" {
+  value = !value_path_exists.findme.exists
+}
+
+output "findme_inexistence_caused_new_value" {
+  value = value_replaced_when.findme_inexistence.value
 }

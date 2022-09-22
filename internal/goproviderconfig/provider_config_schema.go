@@ -25,5 +25,5 @@ func GetProviderConfigSchema() *tfprotov6.Schema {
 
 func TryExtractProviderConfigGuidSeedAddition(providerConfig *tfprotov6.DynamicValue) (string, []*tfprotov6.Diagnostic, bool) {
 	providerConfigType := GetProviderConfigType()
-	return TryExtractGetSeedAddition(providerConfig, providerConfigType)
+	return TryUnmarshalDynamicValueThenExtractGuidSeedAddition(providerConfig, providerConfigType)
 }

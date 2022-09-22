@@ -39,7 +39,7 @@ func GetObjectTypeFromSchema(schema *tfprotov6.Schema) tftypes.Type {
 	return tftypes.Object{AttributeTypes: bm}
 }
 
-func UnmarshalState(state *tfprotov6.DynamicValue, stateType tftypes.Type) (tftypes.Value, map[string]tftypes.Value, []*tfprotov6.Diagnostic, bool) {
+func UnmarshalDynamicValue(state *tfprotov6.DynamicValue, stateType tftypes.Type) (tftypes.Value, map[string]tftypes.Value, []*tfprotov6.Diagnostic, bool) {
 	diags := []*tfprotov6.Diagnostic{}
 	valueMap := make(map[string]tftypes.Value)
 	value, err := state.Unmarshal(stateType)
@@ -54,7 +54,19 @@ func UnmarshalState(state *tfprotov6.DynamicValue, stateType tftypes.Type) (tfty
 		goto End
 	}
 
-	err = value.As(&valueMap)
+	{
+		valueMap, diags, isErroneous := UnmarshalValue(&value)
+		return value, valueMap, diags, isErroneous
+	}
+
+End:
+	return value, valueMap, diags, len(diags) != 0
+}
+
+func UnmarshalValue(value *tftypes.Value) (map[string]tftypes.Value, []*tfprotov6.Diagnostic, bool) {
+	diags := []*tfprotov6.Diagnostic{}
+	valueMap := make(map[string]tftypes.Value)
+	err := value.As(&valueMap)
 
 	if err != nil {
 		diags = append(diags, &tfprotov6.Diagnostic{
@@ -67,5 +79,5 @@ func UnmarshalState(state *tfprotov6.DynamicValue, stateType tftypes.Type) (tfty
 	}
 
 End:
-	return value, valueMap, diags, len(diags) != 0
+	return valueMap, diags, len(diags) != 0
 }

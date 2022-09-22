@@ -1,10 +1,9 @@
-package common
+package goproviderconfig
 
 import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 
-	"github.com/pseudo-dynamic/terraform-provider-value/internal/goproviderconfig"
 	"github.com/pseudo-dynamic/terraform-provider-value/internal/schema"
 )
 
@@ -19,13 +18,13 @@ func GetProviderMetaSchema() *tfprotov6.Schema {
 		Version: 0,
 		Block: &tfprotov6.SchemaBlock{
 			Attributes: []*tfprotov6.SchemaAttribute{
-				goproviderconfig.GetGuidSeedAdditionSchemaAttribute(getProviderMetaGuidSeedAdditionAttributeDescription()),
+				GetGuidSeedAdditionSchemaAttribute(GetProviderMetaGuidSeedAdditionAttributeDescription()),
 			},
 		},
 	}
 }
 
-func getProviderMetaGuidSeedAdditionAttributeDescription() string {
+func GetProviderMetaGuidSeedAdditionAttributeDescription() string {
 	return "## Provider Metadata\n" +
 		"Each module can use provider_meta. Please keep in mind that these settings only count " +
 		"for resources of this module! (see [https://www.terraform.io/internals/provider-meta](https://www.terraform.io/internals/provider-meta)):\n" +
@@ -38,10 +37,10 @@ terraform {
 	}
 }` + "\n```\n" +
 		"### Optional\n" +
-		"- `guid_seed_addition` (String) " + goproviderconfig.GetGuidSeedAdditionAttributeDescription()
+		"- `guid_seed_addition` (String) " + GetGuidSeedAdditionAttributeDescription()
 }
 
 func TryExtractProviderMetaGuidSeedAddition(providerMeta *tfprotov6.DynamicValue) (string, []*tfprotov6.Diagnostic, bool) {
 	providerMetaType := GetProviderMetaType()
-	return goproviderconfig.TryExtractGetSeedAddition(providerMeta, providerMetaType)
+	return TryUnmarshalDynamicValueThenExtractGuidSeedAddition(providerMeta, providerMetaType)
 }

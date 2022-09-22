@@ -10,26 +10,45 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
-func TryExtractGetSeedAddition(state *tfprotov6.DynamicValue, stateType tftypes.Type) (string, []*tfprotov6.Diagnostic, bool) {
-	var seedAdditionValue tftypes.Value
+func TryUnmarshalDynamicValueThenExtractGuidSeedAddition(dynamicValue *tfprotov6.DynamicValue, dynamicValueType tftypes.Type) (string, []*tfprotov6.Diagnostic, bool) {
 	seedAddition := ""
 
 	var isErroneous bool
-	var isWorking bool
 
-	stateValueDynamic := state
 	var stateValue tftypes.Value
 	var stateValueMap map[string]tftypes.Value
 	var diags []*tfprotov6.Diagnostic
 
-	if stateValue, stateValueMap, diags, isErroneous = schema.UnmarshalState(stateValueDynamic, stateType); isErroneous {
+	if stateValue, stateValueMap, diags, isErroneous = schema.UnmarshalDynamicValue(dynamicValue, dynamicValueType); isErroneous {
 		goto Return
 	}
 	_ = stateValue
+	_ = stateValueMap
 
-	if seedAdditionValue, isWorking = stateValueMap["guid_seed_addition"]; !isWorking {
+	seedAddition, diags, _ = TryUnmarshalValueThenExtractGuidSeedAddition(&stateValue)
+
+Return:
+	return seedAddition, diags, len(diags) == 0
+}
+
+func TryUnmarshalValueThenExtractGuidSeedAddition(value *tftypes.Value) (string, []*tfprotov6.Diagnostic, bool) {
+	var seedAdditionValue tftypes.Value
+	seedAddition := ""
+
+	var isErroneous bool
+	var isSuccesful bool
+
+	var valueMap map[string]tftypes.Value
+	var diags []*tfprotov6.Diagnostic
+
+	if valueMap, diags, isErroneous = schema.UnmarshalValue(value); isErroneous {
 		goto Return
-	} 
+	}
+	_ = value
+
+	if seedAdditionValue, isSuccesful = valueMap["guid_seed_addition"]; !isSuccesful {
+		goto Return
+	}
 	_ = seedAdditionValue
 
 	if !seedAdditionValue.IsKnown() {

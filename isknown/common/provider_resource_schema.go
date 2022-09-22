@@ -3,6 +3,7 @@ package common
 import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/pseudo-dynamic/terraform-provider-value/internal/goproviderconfig"
 )
 
 type ProviderResourceSchemaParameters struct {
@@ -18,7 +19,7 @@ func GetProviderResourceSchema(schema ProviderResourceSchemaParameters) map[stri
 		schema.ResourceName: {
 			Version: 1,
 			Block: &tfprotov6.SchemaBlock{
-				Description: schema.ResourceDescription + "\n" + getProviderMetaGuidSeedAdditionAttributeDescription(),
+				Description: schema.ResourceDescription + "\n" + goproviderconfig.GetProviderMetaGuidSeedAdditionAttributeDescription(),
 				BlockTypes:  []*tfprotov6.SchemaNestedBlock{},
 				Attributes: []*tfprotov6.SchemaAttribute{
 					{
@@ -30,31 +31,20 @@ func GetProviderResourceSchema(schema ProviderResourceSchemaParameters) map[stri
 						Description: schema.ValueDescription,
 					},
 					{
-						Name:     "guid_seed",
-						Type:     tftypes.String,
-						Required: true,
-						Optional: false,
-						Computed: false,
-						Description: "Attention! The seed is being used to determine resource uniqueness prior (first plan phase) " +
-							"and during apply phase (second plan phase). Very important to state is that the **seed must be fully " +
-							"known during the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the " +
-							"**seed of every \"" + schema.ResourceName + "\" must be unique**! I really recommend you to use the " +
-							"provider configuration and/or provider_meta configuration to increase resource uniqueness. " +
-							"Besides `guid_seed`, the provider configuration seed, the provider_meta configuration seed and " +
-							"the resource type itself will become part of the final seed. Under certain circumstances you " +
-							"may face problems if you run terraform concurrenctly. If you do so, then I recommend you to " +
-							"pass-through a random value via a user (environment) variable that you then add to the seed.",
+						Name:        "guid_seed",
+						Type:        tftypes.String,
+						Required:    true,
+						Optional:    false,
+						Computed:    false,
+						Description: goproviderconfig.GetGuidSeedAttributeDescription(schema.ResourceName),
 					},
 					{
-						Name:     "proposed_unknown",
-						Type:     tftypes.DynamicPseudoType,
-						Required: true,
-						Optional: false,
-						Computed: false,
-						Description: "It is very crucial that this field is **not** filled by any " +
-							"custom value except the one produced by `value_unknown_proposer` (resource). " +
-							"This has the reason as its `value` is **always** unknown during the plan phase. " +
-							"On this behaviour this resource must rely and it cannot check if you do not so!",
+						Name:        "proposed_unknown",
+						Type:        tftypes.DynamicPseudoType,
+						Required:    true,
+						Optional:    false,
+						Computed:    false,
+						Description: goproviderconfig.GetProposedUnknownAttributeDescription(),
 					},
 					{
 						Name:        "result",
