@@ -17,7 +17,7 @@ description: |-
 
 ### Optional
 
-- `guid_seed_addition` (String) It serves as addition to each seed of any `value_is_fully_known` (resource) or `value_is_known` (resource) within the project if specified in provider, or within the same module if specified in provider-meta.
+- `guid_seed_addition` (String) It serves as an guid seed addition to those resources that implement `guid_seed` as an attribute. But there are scopes you need to keep in mind: if `guid_seed_addition` has been specified in the provider block then top-level and nested modules are using the provider block seed addition. If `guid_seed_addition` has been specified in the provider_meta block then only the resources of that module are using the module-level seed addition. Besides `guid_seed`, the provider block seed addition, the provider_meta block seed addition and the resource type itself will become part of the final seed.
 
 	**Placeholders**:
 	- "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is

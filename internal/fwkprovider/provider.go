@@ -77,7 +77,7 @@ func (p *provider) Resources(_ context.Context) []func() resource.Resource {
 			return NewUnknownProposerResource()
 		},
 		func() resource.Resource {
-			return NewPathExistsResource()
+			return NewOSPathResource()
 		},
 	}
 }

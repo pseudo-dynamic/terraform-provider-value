@@ -25,24 +25,24 @@ locals {
   }
 }
 
-resource "value_path_exists" "findme" {
+resource "value_os_path" "findme" {
   path             = local.files["findme"].fullname
   guid_seed        = "findme"
   proposed_unknown = value_unknown_proposer.default.value
 }
 
 resource "value_replaced_when" "findme_inexistence" {
-  condition = !value_path_exists.findme.exists
+  condition = !value_os_path.findme.exists
 }
 
 resource "local_file" "findme" {
-  count    = !value_path_exists.findme.exists ? 1 : 0
+  count    = !value_os_path.findme.exists ? 1 : 0
   content  = ""
   filename = local.files["findme"].fullname
 }
 
 output "is_findme_inexistent" {
-  value = !value_path_exists.findme.exists
+  value = !value_os_path.findme.exists
 }
 
 output "findme_inexistence_caused_new_value" {

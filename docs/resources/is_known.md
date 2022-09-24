@@ -17,7 +17,7 @@ description: |-
   }
   ```
   Optional
-  guid_seed_addition (String) It serves as addition to each seed of any value_is_fully_known (resource) or value_is_known (resource) within the project if specified in provider, or within the same module if specified in provider-meta.
+  guid_seed_addition (String) It serves as an guid seed addition to those resources that implement guid_seed as an attribute. But there are scopes you need to keep in mind: if guid_seed_addition has been specified in the provider block then top-level and nested modules are using the provider block seed addition. If guid_seed_addition has been specified in the providermeta block then only the resources of that module are using the module-level seed addition. Besides guid_seed, the provider block seed addition, the providermeta block seed addition and the resource type itself will become part of the final seed.
   Placeholders:
   "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
   recommended because this value won't be dragged along the plan and apply phase in comparison to
@@ -41,7 +41,7 @@ terraform {
 }
 ```
 ### Optional
-- `guid_seed_addition` (String) It serves as addition to each seed of any `value_is_fully_known` (resource) or `value_is_known` (resource) within the project if specified in provider, or within the same module if specified in provider-meta.
+- `guid_seed_addition` (String) It serves as an guid seed addition to those resources that implement `guid_seed` as an attribute. But there are scopes you need to keep in mind: if `guid_seed_addition` has been specified in the provider block then top-level and nested modules are using the provider block seed addition. If `guid_seed_addition` has been specified in the provider_meta block then only the resources of that module are using the module-level seed addition. Besides `guid_seed`, the provider block seed addition, the provider_meta block seed addition and the resource type itself will become part of the final seed.
 
 	**Placeholders**:
 	- "{workdir}" (Keyword) The actual workdir; equals to terraform's path.root. This placeholder is
@@ -56,7 +56,7 @@ terraform {
 
 ### Required
 
-- `guid_seed` (String) Attention! The seed is being used to determine resource uniqueness prior (first plan phase) and during apply phase (second plan phase). Very important to state is that the **seed must be fully known during the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the **seed of every "value_is_known" must be unique**! I really recommend you to use the provider configuration and/or provider_meta configuration to increase resource uniqueness. Besides `guid_seed`, the provider configuration seed, the provider_meta configuration seed and the resource type itself will become part of the final seed. Under certain circumstances you may face problems if you run terraform concurrenctly. If you do so, then I recommend you to pass-through a random value via a user (environment) variable that you then add to the seed.
+- `guid_seed` (String) Attention! The seed is being used to determine resource uniqueness prior (first plan phase) and during apply phase (second plan phase). Very important to state is that the **seed must be fully known during the plan phase**, otherwise, an error is thrown. Within one terraform plan & apply the **seed of every "value_is_known" must be unique**! I really recommend you to use the provider configuration and/or provider_meta configuration to increase resource uniqueness. Besides `guid_seed`, the provider block seed addition, the provider_meta block seed addition and the resource type itself will become part of the final seed. Under certain circumstances you may face problems if you run terraform concurrenctly. If you do so, then I recommend you to pass-through a random value via a user (environment) variable that you then add to the seed.
 - `proposed_unknown` (Dynamic) It is very crucial that this field is **not** filled by any custom value except the one produced by `value_unknown_proposer` (resource). This has the reason as its `value` is **always** unknown during the plan phase. On this behaviour this resource must rely and it cannot check if you do not so!
 - `value` (Dynamic) The `value` (not nested attributes) is test against "(known after apply)"
 

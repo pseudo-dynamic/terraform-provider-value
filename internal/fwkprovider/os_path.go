@@ -14,26 +14,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const pathExistsResourceSuffix string = "_path_exists"
-const pathExistsResourceName string = providerName + pathExistsResourceSuffix
+const osPathResourceSuffix string = "_os_path"
+const osPathResourceName string = providerName + osPathResourceSuffix
 
-type pathExistsResource struct {
+type osPathResource struct {
 	ProviderGuidSeedAddition *string
 }
 
-type pathExistsResourceWithTraits interface {
+type osPathResourceWithTraits interface {
 	resource.ResourceWithMetadata
 	resource.ResourceWithGetSchema
 	resource.ResourceWithModifyPlan
 	resource.ResourceWithConfigure
 }
 
-func NewPathExistsResource() pathExistsResourceWithTraits {
-	return &pathExistsResource{}
+func NewOSPathResource() osPathResourceWithTraits {
+	return &osPathResource{}
 }
 
-// Configure implements pathExistsResourceWithTraits
-func (r *pathExistsResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+// Configure implements osPathResourceWithTraits
+func (r *osPathResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		// For whatever reason Configure gets called with nil ProviderData.
 		return
@@ -43,7 +43,7 @@ func (r *pathExistsResource) Configure(ctx context.Context, req resource.Configu
 	r.ProviderGuidSeedAddition = provderData.GuidSeedAddition
 }
 
-func (r pathExistsResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r osPathResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Description: "Checks if an OS path exists and caches its computation at plan-time and won't change after " +
 			"apply-time even the path may have been removed." + "\n" + goproviderconfig.GetProviderMetaGuidSeedAdditionAttributeDescription(),
@@ -61,7 +61,7 @@ func (r pathExistsResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Dia
 			"guid_seed": {
 				Type:        types.StringType,
 				Required:    true,
-				Description: goproviderconfig.GetGuidSeedAttributeDescription(pathExistsResourceName),
+				Description: goproviderconfig.GetGuidSeedAttributeDescription(osPathResourceName),
 			},
 			"exists": {
 				Type:        types.BoolType,
@@ -72,26 +72,26 @@ func (r pathExistsResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-type pathExistsState struct {
+type osPathState struct {
 	Path            types.String `tfsdk:"path"`
 	GuidSeed        types.String `tfsdk:"guid_seed"`
 	ProposedUnknown types.Bool   `tfsdk:"proposed_unknown"`
 	Exists          types.Bool   `tfsdk:"exists"`
 }
 
-func (r *pathExistsResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + pathExistsResourceSuffix
+func (r *osPathResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + osPathResourceSuffix
 }
 
-// ModifyPlan implements PathExistsResourceWithTraits
-func (r *pathExistsResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+// ModifyPlan implements OSPathResourceWithTraits
+func (r *osPathResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	if r.ProviderGuidSeedAddition == nil {
 		resp.Diagnostics.AddError("Bad provider guid seed", "Provider guid seed is null but was expected to be empty")
 		return
 	}
 
 	// Get current config
-	var config pathExistsState
+	var config osPathState
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 
@@ -114,7 +114,7 @@ func (r *pathExistsResource) ModifyPlan(ctx context.Context, req resource.Modify
 
 	composedGuidSeed := guid.ComposeGuidSeed(r.ProviderGuidSeedAddition,
 		&providerMetaSeedAddition,
-		pathExistsResourceName,
+		osPathResourceName,
 		"exists",
 		&suppliedGuidSeed)
 
@@ -124,14 +124,14 @@ func (r *pathExistsResource) ModifyPlan(ctx context.Context, req resource.Modify
 		}
 
 		_, err := os.Stat(config.Path.Value)
-		pathExists := err == nil
-		return types.Bool{Value: pathExists}
+		osPath := err == nil
+		return types.Bool{Value: osPath}
 	}
 
 	cachedExists, err := guid.GetPlanCachedBoolean(
 		isPlanPhase,
 		composedGuidSeed,
-		pathExistsResourceName,
+		osPathResourceName,
 		checkPathExistence)
 
 	if err != nil {
@@ -144,9 +144,9 @@ func (r *pathExistsResource) ModifyPlan(ctx context.Context, req resource.Modify
 }
 
 // Create a new resource
-func (r pathExistsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r osPathResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan pathExistsState
+	var plan osPathState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 
@@ -163,9 +163,9 @@ func (r pathExistsResource) Create(ctx context.Context, req resource.CreateReque
 }
 
 // Read resource information
-func (r pathExistsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r osPathResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Get current state
-	var state pathExistsState
+	var state osPathState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 
@@ -182,9 +182,9 @@ func (r pathExistsResource) Read(ctx context.Context, req resource.ReadRequest, 
 }
 
 // Update resource
-func (r pathExistsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r osPathResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Get plan
-	var plan pathExistsState
+	var plan osPathState
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 
@@ -202,8 +202,8 @@ func (r pathExistsResource) Update(ctx context.Context, req resource.UpdateReque
 }
 
 // Delete resource
-func (r pathExistsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state pathExistsState
+func (r osPathResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state osPathState
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 
